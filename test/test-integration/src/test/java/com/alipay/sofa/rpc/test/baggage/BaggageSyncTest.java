@@ -25,8 +25,6 @@ import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import org.junit.Assert;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class BaggageSyncTest extends BaggageBaseTest {

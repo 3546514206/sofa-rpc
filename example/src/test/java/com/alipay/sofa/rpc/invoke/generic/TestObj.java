@@ -17,14 +17,12 @@
 package com.alipay.sofa.rpc.invoke.generic;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class TestObj {
 
     private String str;
-    private int    num;
+    private int num;
 
     public String getStr() {
         return str;
@@ -47,8 +45,8 @@ public class TestObj {
     @Override
     public String toString() {
         return "TestObj{" +
-            "str='" + str + '\'' +
-            ", num=" + num +
-            '}';
+                "str='" + str + '\'' +
+                ", num=" + num +
+                '}';
     }
 }

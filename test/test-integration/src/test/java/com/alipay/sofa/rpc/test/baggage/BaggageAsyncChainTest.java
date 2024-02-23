@@ -17,11 +17,7 @@
 package com.alipay.sofa.rpc.test.baggage;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.config.ApplicationConfig;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.config.MethodConfig;
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.config.*;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
@@ -33,8 +29,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class BaggageAsyncChainTest extends BaggageBaseTest {
@@ -74,8 +68,8 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         referenceBeanC.setDirectUrl("localhost:12299");
         referenceBeanC.setTimeout(1000);
         MethodConfig methodConfigC = new MethodConfig()
-            .setName("hello")
-            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK);
+                .setName("hello")
+                .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK);
         referenceBeanC.setMethods(Collections.singletonList(methodConfigC));
         SampleService sampleServiceC = (SampleService) referenceBeanC.refer();
 
@@ -101,7 +95,7 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
 
         // A 服务
         final String[] str = new String[1];
-        final CountDownLatch[] latch = new CountDownLatch[] { new CountDownLatch(1) };
+        final CountDownLatch[] latch = new CountDownLatch[]{new CountDownLatch(1)};
         final RpcInvokeContext[] contexts = new RpcInvokeContext[1];
         ConsumerConfig referenceBeanA = new ConsumerConfig();
         referenceBeanA.setApplication(new ApplicationConfig().setAppName("AAA"));
@@ -110,8 +104,8 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         referenceBeanA.setDirectUrl("localhost:12299");
         referenceBeanA.setTimeout(3000);
         MethodConfig methodConfigA = new MethodConfig()
-            .setName("hello")
-            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK);
+                .setName("hello")
+                .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK);
         methodConfigA.setOnReturn(new SofaResponseCallback() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
@@ -144,7 +138,7 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         context.putRequestBaggage("reqBaggageC", "a2ccc");
         context.putRequestBaggage("reqBaggageD", "a2ddd");
 
-        System.out.println("-----A1-----" + RpcInvokeContext.getContext());
+        LOGGER.info("-----A1-----" + RpcInvokeContext.getContext());
         String ret = service.hello(); // 测试传递数据
         Assert.assertEquals(ret, null);
         latch[0].await(5000, TimeUnit.MILLISECONDS);
@@ -172,7 +166,7 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         str[0] = null;
         ret = null;
 
-        System.out.println("-----A3-----" + RpcInvokeContext.getContext());
+        LOGGER.info("-----A3-----" + RpcInvokeContext.getContext());
         ret = service.hello(); // 测试不传数据
         Assert.assertEquals(ret, null);
         latch[0].await(5000, TimeUnit.MILLISECONDS);

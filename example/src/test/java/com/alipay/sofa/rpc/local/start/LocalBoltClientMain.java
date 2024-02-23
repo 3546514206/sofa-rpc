@@ -27,8 +27,6 @@ import com.alipay.sofa.rpc.test.HelloService;
 import java.io.File;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class LocalBoltClientMain {
@@ -41,21 +39,21 @@ public class LocalBoltClientMain {
     public static void main(String[] args) throws InterruptedException {
 
         String file = System.getProperty("user.home") + File.separator
-            + "localFileTest" + File.separator + "localRegistry.reg";
+                + "localFileTest" + File.separator + "localRegistry.reg";
 
         RegistryConfig registryConfig = new RegistryConfig().setProtocol("local")
-            .setFile(file);
+                .setFile(file);
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setRegistry(registryConfig)
-            .setTimeout(3000);
+                .setInterfaceId(HelloService.class.getName())
+                .setRegistry(registryConfig)
+                .setTimeout(3000);
         HelloService helloService = consumerConfig.refer();
 
         ConsumerConfig<EchoService> consumerConfig2 = new ConsumerConfig<EchoService>()
-            .setInterfaceId(EchoService.class.getName())
-            .setRegistry(registryConfig)
-            .setTimeout(3000);
+                .setInterfaceId(EchoService.class.getName())
+                .setRegistry(registryConfig)
+                .setTimeout(3000);
         EchoService echoService = consumerConfig2.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);

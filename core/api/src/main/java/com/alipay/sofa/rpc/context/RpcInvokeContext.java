@@ -37,6 +37,48 @@ public class RpcInvokeContext {
      * 线程上下文变量
      */
     protected static final ThreadLocal<RpcInvokeContext> LOCAL = new ThreadLocal<RpcInvokeContext>();
+    /**
+     * 是否开启上下文透传功能
+     *
+     * @since 5.1.2
+     */
+    private static final boolean BAGGAGE_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.INVOKE_BAGGAGE_ENABLE);
+    /**
+     * 用户自定义超时时间，单次调用生效
+     */
+    protected Integer timeout;
+    /**
+     * 用户自定义对方地址，单次调用生效
+     */
+    protected String targetURL;
+    /**
+     * 用户自定义对方分组
+     */
+    protected String targetGroup;
+    /**
+     * 用户自定义Callback，单次调用生效
+     */
+    protected SofaResponseCallback responseCallback;
+    /**
+     * The Future.
+     */
+    protected ResponseFuture<?> future;
+    /**
+     * 自定义属性
+     */
+    protected ConcurrentMap<String, Object> map = new ConcurrentHashMap<String, Object>();
+    /**
+     * 请求上的透传数据
+     *
+     * @since 5.1.2
+     */
+    protected Map<String, String> requestBaggage = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
+    /**
+     * 响应上的透传数据
+     *
+     * @since 5.1.2
+     */
+    protected Map<String, String> responseBaggage = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
 
     /**
      * 得到上下文，没有则初始化
@@ -50,6 +92,15 @@ public class RpcInvokeContext {
             LOCAL.set(context);
         }
         return context;
+    }
+
+    /**
+     * 设置上下文
+     *
+     * @param context 调用上下文
+     */
+    public static void setContext(RpcInvokeContext context) {
+        LOCAL.set(context);
     }
 
     /**
@@ -69,22 +120,6 @@ public class RpcInvokeContext {
     }
 
     /**
-     * 设置上下文
-     *
-     * @param context 调用上下文
-     */
-    public static void setContext(RpcInvokeContext context) {
-        LOCAL.set(context);
-    }
-
-    /**
-     * 是否开启上下文透传功能
-     *
-     * @since 5.1.2
-     */
-    private static final boolean BAGGAGE_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.INVOKE_BAGGAGE_ENABLE);
-
-    /**
      * 是否启用RPC透传功能
      *
      * @return 是否
@@ -92,50 +127,6 @@ public class RpcInvokeContext {
     public static boolean isBaggageEnable() {
         return BAGGAGE_ENABLE;
     }
-
-    /**
-     * 用户自定义超时时间，单次调用生效
-     */
-    protected Integer                       timeout;
-
-    /**
-     * 用户自定义对方地址，单次调用生效
-     */
-    protected String                        targetURL;
-
-    /**
-     * 用户自定义对方分组
-     */
-    protected String                        targetGroup;
-
-    /**
-     * 用户自定义Callback，单次调用生效
-     */
-    protected SofaResponseCallback          responseCallback;
-
-    /**
-     * The Future.
-     */
-    protected ResponseFuture<?>             future;
-
-    /**
-     * 自定义属性
-     */
-    protected ConcurrentMap<String, Object> map             = new ConcurrentHashMap<String, Object>();
-
-    /**
-     * 请求上的透传数据
-     *
-     * @since 5.1.2
-     */
-    protected Map<String, String>           requestBaggage  = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
-
-    /**
-     * 响应上的透传数据
-     *
-     * @since 5.1.2
-     */
-    protected Map<String, String>           responseBaggage = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
 
     /**
      * 得到调用级别超时时间
@@ -244,7 +235,7 @@ public class RpcInvokeContext {
 
     /**
      * 设置全部请求透传数据
-     * 
+     *
      * @param requestBaggage 请求透传数据
      */
     public void putAllRequestBaggage(Map<String, String> requestBaggage) {
@@ -302,7 +293,7 @@ public class RpcInvokeContext {
 
     /**
      * 设置全部响应透传数据
-     * 
+     *
      * @param responseBaggage 响应透传数据
      */
     public void putAllResponseBaggage(Map<String, String> responseBaggage) {
@@ -391,5 +382,21 @@ public class RpcInvokeContext {
     public RpcInvokeContext setFuture(ResponseFuture<?> future) {
         this.future = future;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append(super.toString());
+        sb.append("{timeout=").append(timeout);
+        sb.append(", targetURL='").append(targetURL).append('\'');
+        sb.append(", targetGroup='").append(targetGroup).append('\'');
+        sb.append(", responseCallback=").append(responseCallback);
+        sb.append(", future=").append(future);
+        sb.append(", map=").append(map);
+        sb.append(", requestBaggage=").append(requestBaggage);
+        sb.append(", responseBaggage=").append(responseBaggage);
+        sb.append('}');
+        return sb.toString();
     }
 }

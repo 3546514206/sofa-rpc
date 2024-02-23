@@ -20,14 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class TestSubBean {
 
     private String name;
-    private Map    parameters;
+    private Map parameters;
 
     public String getName() {
         return name;

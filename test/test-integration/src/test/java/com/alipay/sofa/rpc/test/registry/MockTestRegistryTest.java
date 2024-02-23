@@ -28,8 +28,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public class MockTestRegistryTest extends ActivelyDestroyTest {
@@ -38,26 +36,26 @@ public class MockTestRegistryTest extends ActivelyDestroyTest {
     public void testAll() {
 
         RegistryConfig registryConfig = new RegistryConfig()
-            .setProtocol("mocktest");
+                .setProtocol("mocktest");
 
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22222)
-            .setDaemon(false);
+                .setPort(22222)
+                .setDaemon(false);
 
         // 服务端
         ProviderConfig<HelloService> CProvider = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl(1000))
-            .setRegistry(registryConfig)
-            .setServer(serverConfig2);
+                .setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl(1000))
+                .setRegistry(registryConfig)
+                .setServer(serverConfig2);
         CProvider.export();
 
         // 客户端
         ConsumerConfig<HelloService> BConsumer = new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setInvokeType(RpcConstants.INVOKER_TYPE_SYNC)
-            .setTimeout(5000)
-            .setRegistry(registryConfig);
+                .setInterfaceId(HelloService.class.getName())
+                .setInvokeType(RpcConstants.INVOKER_TYPE_SYNC)
+                .setTimeout(5000)
+                .setRegistry(registryConfig);
         HelloService helloService = BConsumer.refer();
 
         // 正常

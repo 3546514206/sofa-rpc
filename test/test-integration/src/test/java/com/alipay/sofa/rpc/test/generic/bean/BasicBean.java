@@ -21,23 +21,23 @@ package com.alipay.sofa.rpc.test.generic.bean;
  * @since 2017/01/06
  */
 public class BasicBean {
-    private short   s;
-    private Short   ss;
+    private short s;
+    private Short ss;
 
-    private int     i;
+    private int i;
     private Integer ii;
 
-    private byte    b;
-    private Byte    bb;
+    private byte b;
+    private Byte bb;
 
-    private long    l;
-    private Long    ll;
+    private long l;
+    private Long ll;
 
-    private float   f;
-    private Float   ff;
+    private float f;
+    private Float ff;
 
-    private double  d;
-    private Double  dd;
+    private double d;
+    private Double dd;
 
     private boolean bo;
     private Boolean bbo;

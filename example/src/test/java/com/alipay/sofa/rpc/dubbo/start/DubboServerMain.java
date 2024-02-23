@@ -28,8 +28,6 @@ import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class DubboServerMain {
@@ -43,29 +41,29 @@ public class DubboServerMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("dubbo-server");
 
         ServerConfig serverConfig = new ServerConfig()
-            .setProtocol("dubbo")
-            .setHost("127.0.0.1")
-            .setPort(20080)
-            .setSerialization("hessian2")
-            .setDaemon(false);
+                .setProtocol("dubbo")
+                .setHost("127.0.0.1")
+                .setPort(20080)
+                .setSerialization("hessian2")
+                .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setBootstrap("dubbo")
-            .setApplication(applicationConfig)
-            .setRef(new HelloServiceImpl())
-            .setUniqueId("xxx")
-            .setServer(serverConfig)
-            .setRegister(false);
+                .setInterfaceId(HelloService.class.getName())
+                .setBootstrap("dubbo")
+                .setApplication(applicationConfig)
+                .setRef(new HelloServiceImpl())
+                .setUniqueId("xxx")
+                .setServer(serverConfig)
+                .setRegister(false);
 
         ProviderConfig<EchoService> providerConfig2 = new ProviderConfig<EchoService>()
-            .setInterfaceId(EchoService.class.getName())
-            .setRef(new EchoServiceImpl())
-            .setApplication(applicationConfig)
-            .setBootstrap("dubbo")
-            .setUniqueId("xxx")
-            .setServer(serverConfig)
-            .setRegister(false);
+                .setInterfaceId(EchoService.class.getName())
+                .setRef(new EchoServiceImpl())
+                .setApplication(applicationConfig)
+                .setBootstrap("dubbo")
+                .setUniqueId("xxx")
+                .setServer(serverConfig)
+                .setRegister(false);
 
         providerConfig.export();
         providerConfig2.export();

@@ -16,8 +16,7 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
 
 /**
  * <p>类型转换工具类</p>
@@ -37,16 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class ClassTypeUtils {
-
-    /**
-     * String-->Class 缓存，指定大小
-     */
-    private final static Map<String, Class> CLASS_MAP    = new ConcurrentHashMap<String, Class>();
-
-    /**
-     * String-->Class 缓存，指定大小
-     */
-    private final static Map<Class, String> TYPE_STR_MAP = new ConcurrentHashMap<Class, String>();
 
     /**
      * Class[]转String[]
@@ -73,7 +62,7 @@ public class ClassTypeUtils {
      * @return Class[]
      */
     public static Class getClass(String typeStr) {
-        Class clazz = CLASS_MAP.get(typeStr);
+        Class clazz = ReflectCache.getClassCache(typeStr);
         if (clazz == null) {
             if ("void".equals(typeStr)) {
                 clazz = void.class;
@@ -97,7 +86,7 @@ public class ClassTypeUtils {
                 String jvmName = canonicalNameToJvmName(typeStr);
                 clazz = ClassUtils.forName(jvmName);
             }
-            CLASS_MAP.put(typeStr, clazz);
+            ReflectCache.putClassCache(typeStr, clazz);
         }
         return clazz;
     }
@@ -146,7 +135,7 @@ public class ClassTypeUtils {
      *
      * @param types Class[]
      * @return 对象描述
-     * @see #getClasses(String[]) 
+     * @see #getClasses(String[])
      */
     public static String[] getTypeStrs(Class[] types) {
         return getTypeStrs(types, false);
@@ -156,8 +145,8 @@ public class ClassTypeUtils {
      * Class[]转String[] <br>
      * 注意，得到的String可能不能直接用于Class.forName，请使用getClasses(String[])反向获取
      *
-     * @param types Class[]
-     * @param javaStyle JDK自带格式，例如 int[], true的话返回 [I; false的话返回int[]            
+     * @param types     Class[]
+     * @param javaStyle JDK自带格式，例如 int[], true的话返回 [I; false的话返回int[]
      * @return 对象描述
      * @see #getClasses(String[])
      */
@@ -182,7 +171,7 @@ public class ClassTypeUtils {
      * @see #getClass(String)
      */
     public static String getTypeStr(Class clazz) {
-        String typeStr = TYPE_STR_MAP.get(clazz);
+        String typeStr = ReflectCache.getTypeStrCache(clazz);
         if (typeStr == null) {
             if (clazz.isArray()) {
                 String name = clazz.getName(); // 原始名字：[Ljava.lang.String;
@@ -190,7 +179,7 @@ public class ClassTypeUtils {
             } else {
                 typeStr = clazz.getName();
             }
-            TYPE_STR_MAP.put(clazz, typeStr);
+            ReflectCache.putTypeStrCache(clazz, typeStr);
         }
         return typeStr;
     }

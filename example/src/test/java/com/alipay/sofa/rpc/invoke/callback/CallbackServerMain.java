@@ -23,8 +23,6 @@ import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class CallbackServerMain {
@@ -34,15 +32,15 @@ public class CallbackServerMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("future-server");
 
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22222)
-            .setDaemon(false);
+                .setPort(22222)
+                .setDaemon(false);
 
         // C服务的服务端
         ProviderConfig<HelloService> CProvider = new ProviderConfig<HelloService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl(1000))
-            .setServer(serverConfig2);
+                .setApplication(applicationConfig)
+                .setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl(1000))
+                .setServer(serverConfig2);
         CProvider.export();
     }
 }

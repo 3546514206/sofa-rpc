@@ -22,54 +22,53 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
-public class WarmUpTest extends ActivelyDestroyTest {
+public class WarmUpTest extends BaseZkTest {
 
     @Test
     public void testWarmUp() throws InterruptedException {
 
         RegistryConfig registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
-            .setAddress("127.0.0.1:2181");
+                .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
+                .setAddress("127.0.0.1:2181");
 
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(22222)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+                .setPort(22222)
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         ProviderConfig<WarmUpService> providerConfig = new ProviderConfig<WarmUpService>()
-            .setInterfaceId(WarmUpService.class.getName())
-            .setRef(new WarmUpServiceImpl(22222))
-            .setServer(serverConfig)
-            .setRegistry(registryConfig)
-            .setParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME, "2000")
-            .setParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, "100")
-            .setWeight(0);
+                .setInterfaceId(WarmUpService.class.getName())
+                .setRef(new WarmUpServiceImpl(22222))
+                .setServer(serverConfig)
+                .setRegistry(registryConfig)
+                .setParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME, "2000")
+                .setParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, "100")
+                .setWeight(0);
 
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22111)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+                .setPort(22111)
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         ProviderConfig<WarmUpService> providerConfig2 = new ProviderConfig<WarmUpService>()
-            .setInterfaceId(WarmUpService.class.getName())
-            .setRef(new WarmUpServiceImpl(22111))
-            .setServer(serverConfig2)
-            .setRegistry(registryConfig)
-            .setRepeatedExportLimit(-1)
-            .setWeight(0);
+                .setInterfaceId(WarmUpService.class.getName())
+                .setRef(new WarmUpServiceImpl(22111))
+                .setServer(serverConfig2)
+                .setRegistry(registryConfig)
+                .setRepeatedExportLimit(-1)
+                .setWeight(0);
 
         providerConfig.export();
         providerConfig2.export();
 
         long startTime = System.currentTimeMillis();
         ConsumerConfig<WarmUpService> consumerConfig = new ConsumerConfig<WarmUpService>()
-            .setInterfaceId(WarmUpService.class.getName())
-            .setRegistry(registryConfig)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+                .setInterfaceId(WarmUpService.class.getName())
+                .setRegistry(registryConfig)
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         WarmUpService warmUpService = consumerConfig.refer();
 
         // Before the 2000 ms, all the traffic goes to 22222.
@@ -78,7 +77,7 @@ public class WarmUpTest extends ActivelyDestroyTest {
         }
 
         long elapsed = System.currentTimeMillis() - startTime;
-        System.out.println("elapsed " + elapsed + "ms");
+        LOGGER.info("elapsed " + elapsed + "ms");
 
         long sleepTime = 2100 - elapsed;
         if (sleepTime >= 0) {

@@ -21,13 +21,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ServerFactoryTest {
     @Test
-    public void getServer() throws Exception {
+    public void getServer() {
         ServerConfig serverConfig = new ServerConfig().setProtocol("test").setPort(1234);
         Server server = ServerFactory.getServer(serverConfig);
         Assert.assertNotNull(server);
@@ -40,14 +38,20 @@ public class ServerFactoryTest {
             error = true;
         }
         Assert.assertTrue(error);
+
+        Assert.assertTrue(ServerFactory.getServers().size() > 0);
+
+        ServerFactory.destroyAll();
     }
 
     @Test
-    public void getServers() throws Exception {
+    public void destroyServer() {
+        ServerConfig serverConfig = new ServerConfig().setProtocol("test").setPort(1234);
+        Server server = serverConfig.buildIfAbsent();
+        Assert.assertNotNull(server);
+        Assert.assertEquals(1, ServerFactory.getServers().size());
+        serverConfig.destroy();
+        Assert.assertEquals(0, ServerFactory.getServers().size());
+        Assert.assertNull(serverConfig.getServer());
     }
-
-    @Test
-    public void destroyAll() throws Exception {
-    }
-
 }

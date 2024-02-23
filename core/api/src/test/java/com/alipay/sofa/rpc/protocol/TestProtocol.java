@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.protocol;
 import com.alipay.sofa.rpc.ext.Extension;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Extension(value = "xx", code = 121)

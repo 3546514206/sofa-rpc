@@ -29,8 +29,6 @@ import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import java.util.Arrays;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class CustomFilterServerMain {
@@ -47,17 +45,17 @@ public class CustomFilterServerMain {
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
 
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(22000)
-            .setDaemon(false);
+                .setPort(22000)
+                .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setApplication(application)
-            .setRef(new HelloServiceImpl())
-            .setServer(serverConfig)
-            .setFilter(Arrays.asList("customEcho"))
-            .setFilterRef(Arrays.asList(customEchoFilter2))
-            .setRegister(false);
+                .setInterfaceId(HelloService.class.getName())
+                .setApplication(application)
+                .setRef(new HelloServiceImpl())
+                .setServer(serverConfig)
+                .setFilter(Arrays.asList("customEcho"))
+                .setFilterRef(Arrays.asList(customEchoFilter2))
+                .setRegister(false);
 
         providerConfig.export();
 

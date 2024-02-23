@@ -17,17 +17,15 @@
 package com.alipay.sofa.rpc.event;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class TestAsyncSubscriber extends Subscriber {
 
+    private String cache;
+
     TestAsyncSubscriber() {
         super(false);
     }
-
-    private String cache;
 
     @Override
     public void onEvent(Event event) {

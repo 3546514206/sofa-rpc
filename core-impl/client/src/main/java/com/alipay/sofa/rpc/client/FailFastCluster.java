@@ -49,14 +49,14 @@ public class FailFastCluster extends AbstractCluster {
                 return response;
             } else {
                 throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
-                        + " on remote server " + providerInfo + ", return null");
+                        "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
+                                + " on remote server " + providerInfo + ", return null");
             }
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
-                    + " on remote server: " + providerInfo + ", cause by: "
-                    + e.getClass().getName() + ", message is: " + e.getMessage(), e);
+                    "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
+                            + " on remote server: " + providerInfo + ", cause by: "
+                            + e.getClass().getName() + ", message is: " + e.getMessage(), e);
         }
     }
 }

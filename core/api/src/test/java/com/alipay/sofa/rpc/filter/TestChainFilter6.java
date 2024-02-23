@@ -25,7 +25,7 @@ import com.alipay.sofa.rpc.ext.Extension;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("testChainFilter6")
+@Extension(value = "testChainFilter6", order = 6)
 @AutoActive(providerSide = true)
 public class TestChainFilter6 extends Filter {
 
@@ -41,7 +41,7 @@ public class TestChainFilter6 extends Filter {
 
     @Override
     public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable throwable)
-        throws SofaRpcException {
+            throws SofaRpcException {
         response.setAppResponse(response.getAppResponse() + "_a6");
     }
 }

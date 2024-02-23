@@ -47,10 +47,6 @@ public class SofaRpcException extends RuntimeException {
         this.errorType = errorType;
     }
 
-    public int getErrorType() {
-        return errorType;
-    }
-
     @Deprecated
     public SofaRpcException(String message) {
         super(message);
@@ -59,5 +55,9 @@ public class SofaRpcException extends RuntimeException {
     @Deprecated
     public SofaRpcException(String message, Throwable t) {
         super(message, t);
+    }
+
+    public int getErrorType() {
+        return errorType;
     }
 }

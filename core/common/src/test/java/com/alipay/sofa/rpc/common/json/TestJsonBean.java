@@ -17,44 +17,54 @@
 package com.alipay.sofa.rpc.common.json;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public class TestJsonBean {
 
+    private static String staticString;
     @JSONField(alias = "Name", isRequired = true)
-    private String                  name;
+    private String name;
     @JSONField(alias = "Sex")
-    private boolean                 sex;
-    private int                     age;
+    private boolean sex;
+    private int age;
     @JSONField(skipIfNull = true)
     private ArrayList<TestJsonBean> friends;
-    @JSONField(alias = "Remark")
-    private Object[]                remark;
-
     @JSONField(skipIfNull = true)
-    private Status                  status;
-
-    private Long                    step;
-
-    private static String           staticString;
-    private transient String        transString;
+    private Set<TestJsonBean> vips;
+    @JSONField(alias = "Remark")
+    private Object[] remark;
+    @JSONField(skipIfNull = true)
+    private Status status;
+    private Long step;
+    private transient String transString;
     @JSONIgnore
-    private String                  ignoreString;
+    private String ignoreString;
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isSex() {
         return sex;
     }
 
+    public void setSex(boolean sex) {
+        this.sex = sex;
+    }
+
     public int getAge() {
         return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
     }
 
     public ArrayList<TestJsonBean> getFriends() {
@@ -65,20 +75,17 @@ public class TestJsonBean {
         this.friends = friends;
     }
 
+    public Set<TestJsonBean> getVips() {
+        return vips;
+    }
+
+    public TestJsonBean setVips(Set<TestJsonBean> vips) {
+        this.vips = vips;
+        return this;
+    }
+
     public Object[] getRemark() {
         return remark;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSex(boolean sex) {
-        this.sex = sex;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
     }
 
     public void setRemark(Object[] remark) {
@@ -121,7 +128,7 @@ public class TestJsonBean {
         START(0, "启动"),
         STOP(1, "停止");
 
-        int    code;
+        int code;
         String name;
 
         Status(int code, String name) {

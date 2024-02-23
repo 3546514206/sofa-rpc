@@ -27,23 +27,23 @@ import org.junit.Test;
 public class ClientTransportFactoryTest {
 
     @Test
-    public void doReuseTest() {
+    public void doNotReuseTest() {
         ClientTransportConfig config = new ClientTransportConfig();
         config.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12222))
-            .setContainer("test");
+                .setContainer("test");
 
         TestClientTransport clientTransport = (TestClientTransport) ClientTransportFactory.getClientTransport(config);
 
         ClientTransportConfig config2 = new ClientTransportConfig();
         config2.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12222))
-            .setContainer("test");
+                .setContainer("test");
         TestClientTransport clientTransport2 = (TestClientTransport) ClientTransportFactory.getClientTransport(config2);
 
-        Assert.assertTrue(clientTransport == clientTransport2);
+        Assert.assertTrue(clientTransport != clientTransport2);
 
         ClientTransportConfig config3 = new ClientTransportConfig();
         config3.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12223))
-            .setContainer("test");
+                .setContainer("test");
         TestClientTransport clientTransport3 = (TestClientTransport) ClientTransportFactory.getClientTransport(config3);
         Assert.assertFalse(clientTransport == clientTransport3);
 
@@ -66,13 +66,13 @@ public class ClientTransportFactoryTest {
     public void testReverseClientTransport() {
         ClientTransportConfig config = new ClientTransportConfig();
         config.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12222))
-            .setContainer("test");
+                .setContainer("test");
         TestClientTransport clientTransport = (TestClientTransport) ClientTransportFactory.getClientTransport(config);
 
         TestChannel serverChannel = new TestChannel(clientTransport.localAddress(), clientTransport.remoteAddress());
 
         TestClientTransport clientTransport2 = (TestClientTransport) ClientTransportFactory.
-            getReverseClientTransport("test", serverChannel);
+                getReverseClientTransport("test", serverChannel);
 
         Assert.assertEquals(serverChannel, clientTransport2.getChannel());
 

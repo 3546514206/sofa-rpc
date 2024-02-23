@@ -25,8 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class OrderedComparatorTest {
@@ -59,7 +57,7 @@ public class OrderedComparatorTest {
 
     private static class Obj implements Sortable {
         private final String name;
-        private final int    order;
+        private final int order;
 
         Obj(String name, int order) {
             this.name = name;

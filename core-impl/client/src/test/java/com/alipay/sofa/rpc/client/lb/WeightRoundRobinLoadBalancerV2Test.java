@@ -20,33 +20,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class WeightRoundRobinLoadBalancerV2Test {
+public class WeightRoundRobinLoadBalancerV2Test extends BaseLoadBalancerTest {
 
     /**
      * 上次选择的服务器
      */
-    private int          currentIndex  = -1;
+    private int currentIndex = -1;
     /**
      * 当前调度的权值
      */
-    private int          currentWeight = 0;
+    private int currentWeight = 0;
     /**
      * 最大权重
      */
-    private int          maxWeight;
+    private int maxWeight;
     /**
      * 权重的最大公约数
      */
-    private int          gcdWeight;
+    private int gcdWeight;
     /**
      * 服务器数
      */
-    private int          serverCount;
-    private List<Server> servers       = new ArrayList<Server>();
+    private int serverCount;
+    private List<Server> servers = new ArrayList<Server>();
+
+    public static void main(String args[]) {
+        WeightRoundRobinLoadBalancerV2Test weightRoundRobin = new WeightRoundRobinLoadBalancerV2Test();
+        weightRoundRobin.init();
+
+        for (int i = 0; i < 15; i++) {
+            Server server = weightRoundRobin.getServer();
+            LOGGER.info("server " + server.getIp() + " weight=" + server.getWeight());
+        }
+    }
 
     /*
      * 得到两值的最大公约数
@@ -68,7 +76,7 @@ public class WeightRoundRobinLoadBalancerV2Test {
         for (int index = 0, len = servers.size(); index < len - 1; index++) {
             if (index == 0) {
                 divisor = greaterCommonDivisor(
-                    servers.get(index).getWeight(), servers.get(index + 1).getWeight());
+                        servers.get(index).getWeight(), servers.get(index + 1).getWeight());
             } else {
                 divisor = greaterCommonDivisor(divisor, servers.get(index).getWeight());
             }
@@ -125,21 +133,11 @@ public class WeightRoundRobinLoadBalancerV2Test {
         serverCount = servers.size();
     }
 
-    public static void main(String args[]) {
-        WeightRoundRobinLoadBalancerV2Test weightRoundRobin = new WeightRoundRobinLoadBalancerV2Test();
-        weightRoundRobin.init();
-
-        for (int i = 0; i < 15; i++) {
-            Server server = weightRoundRobin.getServer();
-            System.out.println("server " + server.getIp() + " weight=" + server.getWeight());
-        }
-    }
-
 }
 
 class Server {
     private String ip;
-    private int    weight;
+    private int weight;
 
     public Server(String ip, int weight) {
         this.ip = ip;

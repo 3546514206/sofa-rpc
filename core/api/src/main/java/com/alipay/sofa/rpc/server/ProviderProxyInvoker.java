@@ -39,7 +39,7 @@ public class ProviderProxyInvoker implements Invoker {
     /**
      * 过滤器执行链
      */
-    private final FilterChain    filterChain;
+    private final FilterChain filterChain;
 
     /**
      * 构造执行链
@@ -50,7 +50,7 @@ public class ProviderProxyInvoker implements Invoker {
         this.providerConfig = providerConfig;
         // 最底层是调用过滤器
         this.filterChain = FilterChain.buildProviderChain(providerConfig,
-            new ProviderInvoker(providerConfig));
+                new ProviderInvoker(providerConfig));
     }
 
     /**

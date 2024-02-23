@@ -39,17 +39,17 @@ public class StringUtilsTest {
         src = "1;2;3";
         array = StringUtils.split(src, ";");
         Assert.assertTrue(array.length == 3);
-        Assert.assertArrayEquals(array, new String[] { "1", "2", "3" });
+        Assert.assertArrayEquals(array, new String[]{"1", "2", "3"});
 
         src = ";1;2;3;";
         array = StringUtils.split(src, ";");
         Assert.assertTrue(array.length == 5);
-        Assert.assertArrayEquals(array, new String[] { "", "1", "2", "3", "" });
+        Assert.assertArrayEquals(array, new String[]{"", "1", "2", "3", ""});
 
         src = "; 1;2 ; 3 ;";
         array = StringUtils.split(src, ";");
         Assert.assertTrue(array.length == 5);
-        Assert.assertArrayEquals(array, new String[] { "", " 1", "2 ", " 3 ", "" });
+        Assert.assertArrayEquals(array, new String[]{"", " 1", "2 ", " 3 ", ""});
 
     }
 
@@ -58,22 +58,22 @@ public class StringUtilsTest {
         String src = "1;2;3";
         String[] array = StringUtils.splitWithCommaOrSemicolon(src);
         Assert.assertTrue(array.length == 3);
-        Assert.assertArrayEquals(array, new String[] { "1", "2", "3" });
+        Assert.assertArrayEquals(array, new String[]{"1", "2", "3"});
 
         src = " 1;2 ; 3 ";
         array = StringUtils.splitWithCommaOrSemicolon(src);
         Assert.assertTrue(array.length == 3);
-        Assert.assertArrayEquals(array, new String[] { "1", "2", "3" });
+        Assert.assertArrayEquals(array, new String[]{"1", "2", "3"});
 
         src = ";;;1;;;;2;;;3;;;;";
         array = StringUtils.splitWithCommaOrSemicolon(src);
         Assert.assertTrue(array.length == 3);
-        Assert.assertArrayEquals(array, new String[] { "1", "2", "3" });
+        Assert.assertArrayEquals(array, new String[]{"1", "2", "3"});
 
         src = "  ;1;2;3;   ";
         array = StringUtils.splitWithCommaOrSemicolon(src);
         Assert.assertTrue(array.length == 3);
-        Assert.assertArrayEquals(array, new String[] { "1", "2", "3" });
+        Assert.assertArrayEquals(array, new String[]{"1", "2", "3"});
 
         array = StringUtils.splitWithCommaOrSemicolon("");
         Assert.assertTrue(CommonUtils.isEmpty(array));
@@ -84,14 +84,14 @@ public class StringUtilsTest {
 
     @Test
     public void testJoin() throws Exception {
-        String[] src = new String[] { "1", "2", "3" };
+        String[] src = new String[]{"1", "2", "3"};
         String arrayString = StringUtils.join(src, "");
         Assert.assertEquals(arrayString, "123");
 
         arrayString = StringUtils.join(src, ",");
         Assert.assertEquals(arrayString, "1,2,3");
 
-        arrayString = StringUtils.join(new String[] {}, ",");
+        arrayString = StringUtils.join(new String[]{}, ",");
         Assert.assertEquals(arrayString, "");
 
         arrayString = StringUtils.join(null, "");
@@ -100,11 +100,11 @@ public class StringUtilsTest {
 
     @Test
     public void testJoinWithComma() throws Exception {
-        String[] src = new String[] { "1", "2", "3" };
+        String[] src = new String[]{"1", "2", "3"};
         String arrayString = StringUtils.joinWithComma(src);
         Assert.assertEquals(arrayString, "1,2,3");
 
-        arrayString = StringUtils.joinWithComma(new String[] {});
+        arrayString = StringUtils.joinWithComma(new String[]{});
         Assert.assertEquals(arrayString, "");
 
         arrayString = StringUtils.joinWithComma(null, null);
@@ -150,5 +150,47 @@ public class StringUtilsTest {
         Assert.assertEquals("", StringUtils.substringAfter("abc", "c"));
         Assert.assertEquals("", StringUtils.substringAfter("abc", "d"));
         Assert.assertEquals("abc", StringUtils.substringAfter("abc", ""));
+    }
+
+    @Test
+    public void testToString() {
+        Assert.assertEquals(null, StringUtils.toString(null));
+        Assert.assertEquals("Bean:11", StringUtils.toString(new Bean("11")));
+
+        Assert.assertEquals(null, StringUtils.toString((Object) null, null));
+        Assert.assertEquals("1", StringUtils.toString((Object) null, "1"));
+        Assert.assertEquals("Bean:11", StringUtils.toString(new Bean("11"), null));
+
+        Assert.assertEquals(null, StringUtils.objectsToString(null));
+        Assert.assertEquals("[]", StringUtils.objectsToString(new Object[0]));
+        Assert.assertEquals("[1,22]", StringUtils.objectsToString(new Object[]{1, "22"}));
+        Assert.assertEquals("[1,Bean:11]", StringUtils.objectsToString(new Object[]{1, new Bean("11")}));
+    }
+
+    @Test
+    public void testEquals() {
+        Assert.assertTrue(StringUtils.equals(null, null));
+        Assert.assertFalse(StringUtils.equals(null, ""));
+        Assert.assertFalse(StringUtils.equals("", null));
+        Assert.assertTrue(StringUtils.equals("", ""));
+        Assert.assertFalse(StringUtils.equals("1", "2"));
+        Assert.assertTrue(StringUtils.equals("1", "1"));
+    }
+
+    class Bean {
+        private String s;
+
+        public Bean() {
+
+        }
+
+        public Bean(String s) {
+            this.s = s;
+        }
+
+        @Override
+        public String toString() {
+            return "Bean:" + s;
+        }
     }
 }

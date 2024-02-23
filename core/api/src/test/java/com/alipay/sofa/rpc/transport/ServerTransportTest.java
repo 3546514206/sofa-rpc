@@ -17,8 +17,6 @@
 package com.alipay.sofa.rpc.transport;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ServerTransportTest {

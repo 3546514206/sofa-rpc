@@ -25,9 +25,9 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ServerSendEvent implements Event {
-    private final SofaRequest  request;
+    private final SofaRequest request;
     private final SofaResponse response;
-    private final Throwable    throwable;
+    private final Throwable throwable;
 
     public ServerSendEvent(SofaRequest request, SofaResponse response, Throwable throwable) {
         this.request = request;

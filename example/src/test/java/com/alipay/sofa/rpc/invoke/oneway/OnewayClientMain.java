@@ -42,19 +42,19 @@ public class OnewayClientMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("oneway-client");
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(HelloService.class.getName())
-            .setInvokeType(RpcConstants.INVOKER_TYPE_ONEWAY)
-            .setTimeout(50000)
-            .setDirectUrl("bolt://127.0.0.1:22222?appName=oneway-server");
+                .setApplication(applicationConfig)
+                .setInterfaceId(HelloService.class.getName())
+                .setInvokeType(RpcConstants.INVOKER_TYPE_ONEWAY)
+                .setTimeout(50000)
+                .setDirectUrl("bolt://127.0.0.1:22222?appName=oneway-server");
         HelloService helloService = consumerConfig.refer();
 
         ConsumerConfig<EchoService> consumerConfig2 = new ConsumerConfig<EchoService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(EchoService.class.getName())
-            .setInvokeType(RpcConstants.INVOKER_TYPE_ONEWAY)
-            .setTimeout(50000)
-            .setDirectUrl("bolt://127.0.0.1:22222?appName=oneway-server");
+                .setApplication(applicationConfig)
+                .setInterfaceId(EchoService.class.getName())
+                .setInvokeType(RpcConstants.INVOKER_TYPE_ONEWAY)
+                .setTimeout(50000)
+                .setDirectUrl("bolt://127.0.0.1:22222?appName=oneway-server");
         EchoService echoService = consumerConfig2.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);

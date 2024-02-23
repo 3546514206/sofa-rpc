@@ -38,8 +38,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public class FutureTest extends ActivelyDestroyTest {
@@ -48,24 +46,24 @@ public class FutureTest extends ActivelyDestroyTest {
     public void testAll() {
 
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22222)
-            .setDaemon(false);
+                .setPort(22222)
+                .setDaemon(false);
 
         // 服务端
         ProviderConfig<HelloService> CProvider = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl(1000))
-            .setServer(serverConfig2);
+                .setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl(1000))
+                .setServer(serverConfig2);
         CProvider.export();
 
         Filter filter = new TestAsyncFilter();
         // 客户端
         ConsumerConfig<HelloService> BConsumer = new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
-            .setTimeout(5000)
-            .setFilterRef(Arrays.asList(filter))
-            .setDirectUrl("bolt://127.0.0.1:22222");
+                .setInterfaceId(HelloService.class.getName())
+                .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
+                .setTimeout(5000)
+                .setFilterRef(Arrays.asList(filter))
+                .setDirectUrl("bolt://127.0.0.1:22222");
         HelloService helloService = BConsumer.refer();
 
         // 正常
@@ -102,7 +100,7 @@ public class FutureTest extends ActivelyDestroyTest {
             error = true;
         } finally {
             end = System.currentTimeMillis();
-            System.out.println("elapsed time " + (end - start) + "ms");
+            LOGGER.info("elapsed time " + (end - start) + "ms");
             Assert.assertTrue((end - start) < 400);
         }
         Assert.assertTrue(error);
@@ -124,7 +122,7 @@ public class FutureTest extends ActivelyDestroyTest {
             error = true;
         } finally {
             end = System.currentTimeMillis();
-            System.out.println("elapsed time " + (end - start) + "ms");
+            LOGGER.info("elapsed time " + (end - start) + "ms");
             Assert.assertTrue((end - start) < 400);
         }
         Assert.assertTrue(error);

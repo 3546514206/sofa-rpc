@@ -21,19 +21,17 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ProxyFactoryTest {
     @Test
     public void buildProxy() throws Exception {
-        TestInterface testInterface = ProxyFactory.buildProxy("test", TestInterface.class, null);
+        TestProxyInterface testInterface = ProxyFactory.buildProxy("test", TestProxyInterface.class, null);
         Assert.assertEquals(testInterface, null);
 
         boolean error = false;
         try {
-            ProxyFactory.buildProxy("xasdasd", TestInterface.class, null);
+            ProxyFactory.buildProxy("xasdasd", TestProxyInterface.class, null);
         } catch (Exception e) {
             error = true;
         }
@@ -41,7 +39,7 @@ public class ProxyFactoryTest {
     }
 
     @Test
-    public void getInvoker() throws Exception {
+    public void getInvoker() {
         Invoker invoke = ProxyFactory.getInvoker(null, "test");
         Assert.assertEquals(invoke, null);
     }

@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.codec;
 import java.util.HashSet;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class MySet<T> extends HashSet<T> {

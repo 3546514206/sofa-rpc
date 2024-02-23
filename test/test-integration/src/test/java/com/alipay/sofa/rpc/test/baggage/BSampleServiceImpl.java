@@ -17,19 +17,23 @@
 package com.alipay.sofa.rpc.test.baggage;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
+import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class BSampleServiceImpl implements SampleService {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(BSampleServiceImpl.class);
 
     private SampleService sampleServiceC;
 
     private SampleService sampleServiceD;
 
-    private String        reqBaggage;
+    private String reqBaggage;
 
     public BSampleServiceImpl(SampleService sampleServiceC, SampleService sampleServiceD) {
         this.sampleServiceC = sampleServiceC;
@@ -39,7 +43,7 @@ public class BSampleServiceImpl implements SampleService {
     @Override
     public String hello() {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        System.out.println("-----b-----:" + context);
+        LOGGER.info("-----b-----:" + context);
         reqBaggage = context.getRequestBaggage("reqBaggageB");
         if (reqBaggage != null) {
             context.putResponseBaggage("respBaggageB", "b2aaa");
@@ -49,6 +53,21 @@ public class BSampleServiceImpl implements SampleService {
         String s1 = sampleServiceC.hello();
         String s2 = sampleServiceD.hello();
         return s1 + s2;
+    }
+
+    @Override
+    public EchoResponse echoObj(EchoRequest req) {
+        RpcInvokeContext context = RpcInvokeContext.getContext();
+        LOGGER.info("-----b-----:" + context);
+        reqBaggage = context.getRequestBaggage("reqBaggageB");
+        if (reqBaggage != null) {
+            context.putResponseBaggage("respBaggageB", "b2aaa");
+        } else {
+            context.putResponseBaggage("respBaggageB_force", "b2aaaff");
+        }
+        EchoResponse s1 = sampleServiceC.echoObj(req);
+        EchoResponse s2 = sampleServiceD.echoObj(req);
+        return EchoResponse.newBuilder().setCode(200).setMessage(s1.getMessage() + s2.getMessage()).build();
     }
 
     public String getReqBaggage() {

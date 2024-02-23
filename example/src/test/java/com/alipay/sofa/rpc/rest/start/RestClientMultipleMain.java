@@ -31,8 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- *
- *
  * @author <a href=ailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class RestClientMultipleMain {
@@ -47,12 +45,12 @@ public class RestClientMultipleMain {
         ApplicationConfig application = new ApplicationConfig().setAppName("test-client");
 
         ConsumerConfig<RestService> consumerConfig = new ConsumerConfig<RestService>()
-            .setApplication(application)
-            .setInterfaceId(RestService.class.getName())
-            .setProtocol("rest")
-            .setBootstrap("rest")
-            .setDirectUrl("rest://127.0.0.1:8888")
-            .setTimeout(3000);
+                .setApplication(application)
+                .setInterfaceId(RestService.class.getName())
+                .setProtocol("rest")
+                .setBootstrap("rest")
+                .setDirectUrl("rest://127.0.0.1:8888")
+                .setTimeout(3000);
         final RestService helloService = consumerConfig.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
@@ -60,7 +58,7 @@ public class RestClientMultipleMain {
         final int threads = 50;
         final AtomicLong cnt = new AtomicLong(0);
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-            new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-"));// 无队列
+                new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-"));// 无队列
         for (int i = 0; i < threads; i++) {
             service1.execute(new Runnable() {
                 @Override

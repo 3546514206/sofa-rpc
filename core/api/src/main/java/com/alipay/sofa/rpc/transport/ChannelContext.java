@@ -37,23 +37,23 @@ public class ChannelContext {
     /**
      * 对方版本
      */
-    protected Integer                           dstVersion;
+    protected Integer dstVersion;
     /**
      * 客户端应用Id
      */
-    protected String                            clientAppId;
+    protected String clientAppId;
     /**
      * 客户端应用名称
      */
-    protected String                            clientAppName;
+    protected String clientAppName;
     /**
      * 客户端应用实例id
      */
-    protected String                            clientInstanceId;
+    protected String clientInstanceId;
     /**
      * 长连接的协议
      */
-    private String                              protocol;
+    private String protocol;
 
     /**
      * Put header cache
@@ -197,21 +197,21 @@ public class ChannelContext {
     }
 
     /**
-     * Sets protocol.
-     *
-     * @param protocol the protocol
-     */
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
-    /**
      * Gets protocol.
      *
      * @return the protocol
      */
     public String getProtocol() {
         return protocol;
+    }
+
+    /**
+     * Sets protocol.
+     *
+     * @param protocol the protocol
+     */
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     /**

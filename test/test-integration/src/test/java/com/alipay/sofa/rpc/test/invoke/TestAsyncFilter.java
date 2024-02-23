@@ -24,8 +24,6 @@ import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class TestAsyncFilter extends Filter {
@@ -36,7 +34,7 @@ public class TestAsyncFilter extends Filter {
 
     @Override
     public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable throwable)
-        throws SofaRpcException {
+            throws SofaRpcException {
         if (request.isAsync() && response != null) {
             response.setAppResponse(response.getAppResponse() + "append by async filter");
         }

@@ -30,8 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class BoltClientMultipleMain {
@@ -44,17 +42,17 @@ public class BoltClientMultipleMain {
     public static void main(String[] args) throws InterruptedException {
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setDirectUrl("bolt://127.0.0.1:22000")
-            .setTimeout(3000)
-            .setRegister(false);
+                .setInterfaceId(HelloService.class.getName())
+                .setDirectUrl("bolt://127.0.0.1:22000")
+                .setTimeout(3000)
+                .setRegister(false);
         final HelloService helloService = consumerConfig.refer();
 
         ConsumerConfig<EchoService> consumerConfig2 = new ConsumerConfig<EchoService>()
-            .setInterfaceId(EchoService.class.getName())
-            .setDirectUrl("bolt://127.0.0.1:22000")
-            .setTimeout(3000)
-            .setRegister(false);
+                .setInterfaceId(EchoService.class.getName())
+                .setDirectUrl("bolt://127.0.0.1:22000")
+                .setTimeout(3000)
+                .setRegister(false);
         final EchoService echoService = consumerConfig2.refer();
 
         LOGGER.error("started at pid {}", RpcRuntimeContext.PID);
@@ -62,7 +60,7 @@ public class BoltClientMultipleMain {
         final int threads = 50;
         final AtomicLong cnt = new AtomicLong(0);
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-            new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-"));// 无队列
+                new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-"));// 无队列
         for (int i = 0; i < threads; i++) {
             service1.execute(new Runnable() {
                 @Override

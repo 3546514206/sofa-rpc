@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
 
 /**
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 @Unstable
@@ -40,12 +39,12 @@ public abstract class AbstractTask implements Runnable, Comparable<AbstractTask>
         return o.getPriority() - this.getPriority();
     }
 
+    public int getPriority() {
+        return priority;
+    }
+
     public AbstractTask setPriority(int priority) {
         this.priority = priority;
         return this;
-    }
-
-    public int getPriority() {
-        return priority;
     }
 }

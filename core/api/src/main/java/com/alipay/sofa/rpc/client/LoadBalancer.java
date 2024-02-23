@@ -42,7 +42,7 @@ public abstract class LoadBalancer {
     /**
      * 服务消费者配置
      */
-    protected final ConsumerConfig    consumerConfig;
+    protected final ConsumerConfig consumerConfig;
 
     /**
      * 构造函数
@@ -72,5 +72,5 @@ public abstract class LoadBalancer {
      * @throws SofaRpcException rpc异常
      */
     public abstract ProviderInfo select(SofaRequest request, List<ProviderInfo> providerInfos)
-        throws SofaRpcException;
+            throws SofaRpcException;
 }

@@ -22,7 +22,7 @@ package com.alipay.sofa.rpc.test.generic.bean;
  */
 public class People {
     private String name;
-    private Job    job;
+    private Job job;
 
     public People() {
     }

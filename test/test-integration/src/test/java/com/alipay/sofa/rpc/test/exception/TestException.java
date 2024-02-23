@@ -17,8 +17,6 @@
 package com.alipay.sofa.rpc.test.exception;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public class TestException extends Exception {

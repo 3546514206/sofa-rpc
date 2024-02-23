@@ -16,11 +16,11 @@
  */
 package com.alipay.sofa.rpc.proxy;
 
-import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * Factory of Proxy SPI
@@ -42,17 +42,16 @@ public final class ProxyFactory {
     public static <T> T buildProxy(String proxyType, Class<T> clazz, Invoker proxyInvoker) throws Exception {
         try {
             ExtensionClass<Proxy> ext = ExtensionLoaderFactory.getExtensionLoader(Proxy.class)
-                .getExtensionClass(proxyType);
+                    .getExtensionClass(proxyType);
             if (ext == null) {
-                throw ExceptionUtils.buildRuntime("consumer.proxy", proxyType,
-                    "Unsupported proxy of client!");
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Proxy", proxyType));
             }
             Proxy proxy = ext.getExtInstance();
             return proxy.getProxy(clazz, proxyInvoker);
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Proxy", proxyType), e);
         }
     }
 
@@ -65,17 +64,16 @@ public final class ProxyFactory {
     public static Invoker getInvoker(Object proxyObject, String proxyType) {
         try {
             ExtensionClass<Proxy> ext = ExtensionLoaderFactory.getExtensionLoader(Proxy.class)
-                .getExtensionClass(proxyType);
+                    .getExtensionClass(proxyType);
             if (ext == null) {
-                throw ExceptionUtils.buildRuntime("consumer.proxy", proxyType,
-                    "Unsupported proxy of client!");
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Registry", proxyType));
             }
             Proxy proxy = ext.getExtInstance();
             return proxy.getInvoker(proxyObject);
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Registry", proxyType));
         }
     }
 }

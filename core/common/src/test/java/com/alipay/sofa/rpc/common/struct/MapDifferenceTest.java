@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class MapDifferenceTest {

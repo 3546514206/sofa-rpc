@@ -31,7 +31,6 @@ import com.alipay.sofa.rpc.test.HelloService;
  * <p>接口级别的Callback</p>
  * <p>
  *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class CallbackClientMain {
@@ -45,28 +44,28 @@ public class CallbackClientMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("future-server");
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(HelloService.class.getName())
-            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
-            .setTimeout(5000)
-            .setOnReturn(new SofaResponseCallback() {
-                @Override
-                public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                    LOGGER.info("Interface get result: {}", appResponse);
-                }
+                .setApplication(applicationConfig)
+                .setInterfaceId(HelloService.class.getName())
+                .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
+                .setTimeout(5000)
+                .setOnReturn(new SofaResponseCallback() {
+                    @Override
+                    public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                        LOGGER.info("Interface get result: {}", appResponse);
+                    }
 
-                @Override
-                public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                    LOGGER.info("Interface get app exception: {}", throwable);
-                }
+                    @Override
+                    public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                        LOGGER.info("Interface get app exception: {}", throwable);
+                    }
 
-                @Override
-                public void onSofaException(SofaRpcException sofaException, String methodName,
-                                            RequestBase request) {
-                    LOGGER.info("Interface get sofa exception: {}", sofaException);
-                }
-            }) // 不设置 调用级别设置
-            .setDirectUrl("bolt://127.0.0.1:22222?appName=future-server");
+                    @Override
+                    public void onSofaException(SofaRpcException sofaException, String methodName,
+                                                RequestBase request) {
+                        LOGGER.info("Interface get sofa exception: {}", sofaException);
+                    }
+                }) // 不设置 调用级别设置
+                .setDirectUrl("bolt://127.0.0.1:22222?appName=future-server");
         HelloService helloService = consumerConfig.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);

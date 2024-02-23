@@ -17,6 +17,9 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.struct.ListDifference;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
@@ -24,29 +27,21 @@ import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConsumerStateListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 import com.alipay.sofa.rpc.transport.ClientTransportFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -67,7 +62,51 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * 服务消费者配置
      */
-    protected ConsumerConfig    consumerConfig;
+    protected ConsumerConfig consumerConfig;
+
+    /**
+     * switch
+     */
+    protected boolean connectionValidate = RpcConfigs
+            .getBooleanValue(RpcOptions.CONNNECTION_VALIDATE_SLEEP);
+
+    /***
+     * 是否允许通过上下文地址创建连接。
+     */
+    protected boolean createConnWhenAbsent = RpcConfigs
+            .getBooleanValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT);
+    /**
+     * 未初始化的（从未连接过，例如lazy=true）
+     */
+    protected ConcurrentMap<ProviderInfo, ClientTransport> uninitializedConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    /**
+     * 存活的客户端列表（保持了长连接，且一切正常的）
+     */
+    protected ConcurrentMap<ProviderInfo, ClientTransport> aliveConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    /**
+     * 存活但是亚健康节点（连续心跳超时，这种只发心跳，不发请求）
+     */
+    protected ConcurrentMap<ProviderInfo, ClientTransport> subHealthConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    /**
+     * 失败待重试的客户端列表（连上后断开的）
+     */
+    protected ConcurrentMap<ProviderInfo, ClientTransport> retryConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    /**
+     * last address for registry pushed
+     */
+    protected Set<ProviderInfo> lastAddresses = new HashSet<ProviderInfo>();
+    /**
+     * 客户端变化provider的锁
+     */
+    protected Lock providerLock = new ReentrantLock();
+    /**
+     * 重连线程
+     */
+    private volatile ScheduledService reconThread;
+    /**
+     * 重试次数标记（针对每个Provider不一样）
+     */
+    private AtomicInteger reconnectFlag = new AtomicInteger();
 
     /**
      * 构造函数
@@ -80,36 +119,11 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     }
 
     /**
-     * 未初始化的（从未连接过，例如lazy=true）
-     */
-    private ConcurrentHashMap<ProviderInfo, ClientTransport> uninitializedConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
-
-    /**
-     * 存活的客户端列表（保持了长连接，且一切正常的）
-     */
-    private ConcurrentHashMap<ProviderInfo, ClientTransport> aliveConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
-
-    /**
-     * 存活但是亚健康节点（连续心跳超时，这种只发心跳，不发请求）
-     */
-    private ConcurrentHashMap<ProviderInfo, ClientTransport> subHealthConnections     = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
-
-    /**
-     * 失败待重试的客户端列表（连上后断开的）
-     */
-    private ConcurrentHashMap<ProviderInfo, ClientTransport> retryConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
-
-    /**
-     * 客户端变化provider的锁
-     */
-    private Lock                                             providerLock             = new ReentrantLock();
-
-    /**
      * Gets retry connections.
      *
      * @return the retry connections
      */
-    public ConcurrentHashMap<ProviderInfo, ClientTransport> getRetryConnections() {
+    public ConcurrentMap<ProviderInfo, ClientTransport> getRetryConnections() {
         return retryConnections;
     }
 
@@ -225,7 +239,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     }
 
     /**
-     * 从存活丢到亚健康列表
+     * 从亚健康丢到重试列表
      *
      * @param providerInfo Provider
      * @param transport    连接
@@ -278,12 +292,13 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 @Override
                 public void run() {
                     // 状态变化通知监听器
+                    final Object proxyIns = consumerConfig.getConsumerBootstrap().getProxyIns();
                     for (ConsumerStateListener listener : onAvailable) {
                         try {
-                            listener.onUnavailable(consumerConfig.getConsumerBootstrap().getProxyIns());
+                            listener.onUnavailable(proxyIns);
                         } catch (Exception e) {
                             LOGGER.errorWithApp(consumerConfig.getAppName(),
-                                "Failed to notify consumer state listener when state change to unavailable");
+                                    LogCodes.getLog(LogCodes.ERROR_NOTIFY_CONSUMER_STATE_UN, proxyIns.getClass().getName()));
                         }
                     }
                 }
@@ -304,12 +319,13 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 @Override
                 public void run() {
                     // 状态变化通知监听器
+                    final Object proxyIns = consumerConfig.getConsumerBootstrap().getProxyIns();
                     for (ConsumerStateListener listener : onAvailable) {
                         try {
-                            listener.onAvailable(consumerConfig.getConsumerBootstrap().getProxyIns());
+                            listener.onAvailable(proxyIns);
                         } catch (Exception e) {
                             LOGGER.warnWithApp(consumerConfig.getAppName(),
-                                "Failed to notify consumer state listener when state change to available");
+                                    LogCodes.getLog(LogCodes.WARN_NOTIFY_CONSUMER_STATE, proxyIns.getClass().getName()));
                         }
                     }
                 }
@@ -347,7 +363,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 if (CommonUtils.isNotEmpty(currentProviderList())) {
                     if (LOGGER.isInfoEnabled(consumerConfig.getAppName())) {
                         LOGGER.infoWithApp(consumerConfig.getAppName(),
-                            "Clear all providers, may be this consumer has been add to blacklist");
+                                "Clear all providers, may be this consumer has been add to blacklist");
                     }
                     closeAllClientTransports(null);
                 }
@@ -369,9 +385,11 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             }
         } catch (Exception e) {
             if (LOGGER.isErrorEnabled(consumerConfig.getAppName())) {
-                LOGGER.errorWithApp(consumerConfig.getAppName(), "update " + consumerConfig.getInterfaceId() +
-                    " provider (" + providerGroup
-                    + ") from list error:", e);
+                LOGGER
+                        .errorWithApp(
+                                consumerConfig.getAppName(),
+                                LogCodes.getLog(LogCodes.ERROR_UPDATE_PROVIDERS, consumerConfig.getInterfaceId(), providerGroup),
+                                e);
             }
         }
     }
@@ -390,6 +408,10 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     }
 
     protected void addNode(List<ProviderInfo> providerInfoList) {
+
+        //first update last all providers
+        lastAddresses.addAll(providerInfoList);
+
         final String interfaceId = consumerConfig.getInterfaceId();
         int providerSize = providerInfoList.size();
         String appName = consumerConfig.getAppName();
@@ -401,43 +423,52 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             int threads = Math.min(10, providerSize); // 最大10个
             final CountDownLatch latch = new CountDownLatch(providerSize);
             ThreadPoolExecutor initPool = new ThreadPoolExecutor(threads, threads,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(providerInfoList.size()),
-                new NamedThreadFactory("CLI-CONN-" + interfaceId, true));
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>(providerInfoList.size()),
+                    new NamedThreadFactory("CLI-CONN-" + interfaceId, true));
             int connectTimeout = consumerConfig.getConnectTimeout();
             for (final ProviderInfo providerInfo : providerInfoList) {
-                final ClientTransportConfig config = providerToClientConfig(providerInfo);
-                initPool.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        ClientTransport transport = ClientTransportFactory.getClientTransport(config);
-                        if (consumerConfig.isLazy()) {
-                            uninitializedConnections.put(providerInfo, transport);
-                            latch.countDown();
-                        } else {
-                            try {
-                                initClientTransport(interfaceId, providerInfo, transport);
-                            } finally {
-                                latch.countDown(); // 连上或者抛异常
-                            }
-                        }
-                    }
-                });
+                initClientRunnable(initPool, latch, providerInfo);
             }
 
             try {
                 int totalTimeout = ((providerSize % threads == 0) ? (providerSize / threads) : ((providerSize /
-                    threads) + 1)) * connectTimeout + 500;
+                        threads) + 1)) * connectTimeout + 500;
                 latch.await(totalTimeout, TimeUnit.MILLISECONDS); // 一直等到子线程都结束
             } catch (InterruptedException e) {
-                LOGGER.errorWithApp(appName, "Exception when add provider", e);
+                LOGGER.errorWithApp(appName,
+                        LogCodes.getLog(LogCodes.ERROR_UPDATE_PROVIDERS, consumerConfig.getInterfaceId(), ""), e);
             } finally {
                 initPool.shutdown(); // 关闭线程池
             }
         }
     }
 
-    private void initClientTransport(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
+    /**
+     * 线程池建立长连接
+     */
+    protected void initClientRunnable(ThreadPoolExecutor initPool, final CountDownLatch latch,
+                                      final ProviderInfo providerInfo) {
+        final ClientTransportConfig config = providerToClientConfig(providerInfo);
+        initPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                ClientTransport transport = ClientTransportFactory.getClientTransport(config);
+                if (consumerConfig.isLazy()) {
+                    uninitializedConnections.put(providerInfo, transport);
+                    latch.countDown();
+                } else {
+                    try {
+                        initClientTransport(consumerConfig.getInterfaceId(), providerInfo, transport);
+                    } finally {
+                        latch.countDown(); // 连上或者抛异常
+                    }
+                }
+            }
+        });
+    }
+
+    protected void initClientTransport(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
         try {
             transport.connect();
             if (doubleCheck(interfaceId, providerInfo, transport)) {
@@ -457,6 +488,10 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     }
 
     public void removeNode(List<ProviderInfo> providerInfos) {
+
+        //first update last all providers
+        lastAddresses.removeAll(providerInfos);
+
         String interfaceId = consumerConfig.getInterfaceId();
         String appName = consumerConfig.getAppName();
         if (LOGGER.isInfoEnabled(appName)) {
@@ -469,28 +504,27 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 ClientTransport transport = remove(providerInfo);
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, "Remove provider of {}: {} from list success !", interfaceId,
-                        providerInfo);
+                            providerInfo);
                 }
                 if (transport != null) {
                     ClientTransportFactory.releaseTransport(transport, consumerConfig.getDisconnectTimeout());
                 }
             } catch (Exception e) {
-                LOGGER.errorWithApp(appName, "Remove provider of " + consumerConfig.getInterfaceId() + ": " +
-                    providerInfo
-                    + " from list error:", e);
+                LOGGER.errorWithApp(appName,
+                        LogCodes.getLog(LogCodes.ERROR_DELETE_PROVIDERS, consumerConfig.getInterfaceId(), providerInfo), e);
             }
         }
     }
 
     @Override
-    public ConcurrentHashMap<ProviderInfo, ClientTransport> getAvailableConnections() {
+    public ConcurrentMap<ProviderInfo, ClientTransport> getAvailableConnections() {
         return aliveConnections.isEmpty() ? subHealthConnections : aliveConnections;
     }
 
     @Override
     public List<ProviderInfo> getAvailableProviders() {
         // 存活为空的，那就用亚健康的
-        ConcurrentHashMap<ProviderInfo, ClientTransport> map =
+        ConcurrentMap<ProviderInfo, ClientTransport> map =
                 aliveConnections.isEmpty() ? subHealthConnections : aliveConnections;
         return new ArrayList<ProviderInfo>(map.keySet());
     }
@@ -520,7 +554,22 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 return getAvailableClientTransport(providerInfo);
             }
         }
-        return null;
+
+        if (createConnWhenAbsent) {
+            RpcInternalContext context = RpcInternalContext.peekContext();
+            String targetIP = (context == null) ? null : (String) context
+                    .getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+            /**
+             * RpcInvokeContext.getContext().setTargetUrl() 设置了地址，初始化tcp连接
+             */
+            if (StringUtils.isNotBlank(targetIP)) {
+                ClientTransportConfig transportConfig = providerToClientConfig(providerInfo);
+                transport = ClientTransportFactory.getClientTransport(transportConfig);
+                initClientTransport(consumerConfig.getInterfaceId(), providerInfo, transport);
+            }
+        }
+
+        return transport;
     }
 
     @Override
@@ -536,14 +585,14 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      */
     protected ClientTransportConfig providerToClientConfig(ProviderInfo providerInfo) {
         return new ClientTransportConfig()
-            .setConsumerConfig(consumerConfig)
-            .setProviderInfo(providerInfo)
-            .setContainer(consumerConfig.getProtocol())
-            .setConnectTimeout(consumerConfig.getConnectTimeout())
-            .setInvokeTimeout(consumerConfig.getTimeout())
-            .setDisconnectTimeout(consumerConfig.getDisconnectTimeout())
-            .setConnectionNum(consumerConfig.getConnectionNum())
-            .setChannelListeners(consumerConfig.getOnConnect());
+                .setConsumerConfig(consumerConfig)
+                .setProviderInfo(providerInfo)
+                .setContainer(consumerConfig.getProtocol())
+                .setConnectTimeout(consumerConfig.getConnectTimeout())
+                .setInvokeTimeout(consumerConfig.getTimeout())
+                .setDisconnectTimeout(consumerConfig.getDisconnectTimeout())
+                .setConnectionNum(consumerConfig.getConnectionNum())
+                .setChannelListeners(consumerConfig.getOnConnect());
     }
 
     /**
@@ -556,9 +605,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         providerLock.lock();
         try {
             ConcurrentHashSet<ProviderInfo> providerInfos = new ConcurrentHashSet<ProviderInfo>();
-            providerInfos.addAll(aliveConnections.keySet());
-            providerInfos.addAll(subHealthConnections.keySet());
-            providerInfos.addAll(retryConnections.keySet());
+            providerInfos.addAll(lastAddresses);
             return providerInfos;
         } finally {
             providerLock.unlock();
@@ -611,6 +658,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             aliveConnections.clear();
             retryConnections.clear();
             uninitializedConnections.clear();
+            lastAddresses.clear();
             return all;
         } finally {
             providerLock.unlock();
@@ -624,6 +672,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      */
     @Override
     public void closeAllClientTransports(DestroyHook destroyHook) {
+
         // 清空所有列表,不让再调了
         Map<ProviderInfo, ClientTransport> all = clearProviders();
         if (destroyHook != null) {
@@ -642,9 +691,9 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             int threads = Math.min(10, providerSize); // 最大10个
             final CountDownLatch latch = new CountDownLatch(providerSize);
             ThreadPoolExecutor closePool = new ThreadPoolExecutor(threads, threads,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(providerSize),
-                new NamedThreadFactory("CLI-DISCONN-" + consumerConfig.getInterfaceId(), true));
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>(providerSize),
+                    new NamedThreadFactory("CLI-DISCONN-" + consumerConfig.getInterfaceId(), true));
             for (Map.Entry<ProviderInfo, ClientTransport> entry : all.entrySet()) {
                 final ProviderInfo providerInfo = entry.getKey();
                 final ClientTransport transport = entry.getValue();
@@ -656,7 +705,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                         } catch (Exception e) {
                             if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                                 LOGGER.warnWithApp(consumerConfig.getAppName(),
-                                    "catch exception but ignore it when close alive client : {}", providerInfo);
+                                        "catch exception but ignore it when close alive client : {}", providerInfo);
                             }
                         } finally {
                             latch.countDown();
@@ -666,7 +715,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             }
             try {
                 int totalTimeout = ((providerSize % threads == 0) ? (providerSize / threads) : ((providerSize /
-                    threads) + 1)) * timeout + 500;
+                        threads) + 1)) * timeout + 500;
                 latch.await(totalTimeout, TimeUnit.MILLISECONDS); // 一直等到
             } catch (InterruptedException e) {
                 LOGGER.errorWithApp(consumerConfig.getAppName(), "Exception when close transport", e);
@@ -686,8 +735,8 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     protected void printSuccess(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
         if (LOGGER.isInfoEnabled(consumerConfig.getAppName())) {
             LOGGER.infoWithApp(consumerConfig.getAppName(), "Connect to {} provider:{} success ! The connection is "
-                + NetUtils.connectToString(transport.remoteAddress(), transport.localAddress())
-                , interfaceId, providerInfo);
+                            + NetUtils.connectToString(transport.remoteAddress(), transport.localAddress())
+                    , interfaceId, providerInfo);
         }
     }
 
@@ -701,7 +750,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     protected void printFailure(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
         if (LOGGER.isInfoEnabled(consumerConfig.getAppName())) {
             LOGGER.infoWithApp(consumerConfig.getAppName(), "Connect to {} provider:{} failure !", interfaceId,
-                providerInfo);
+                    providerInfo);
         }
     }
 
@@ -717,9 +766,9 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         Throwable cause = e.getCause();
         if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
             LOGGER.warnWithApp(consumerConfig.getAppName(),
-                "Connect to {} provider:{} failure !! The exception is " + ExceptionUtils.toShortString(e, 1)
-                    + (cause != null ? ", cause by " + cause.getMessage() + "." : "."),
-                interfaceId, providerInfo);
+                    "Connect to {} provider:{} failure !! The exception is " + ExceptionUtils.toShortString(e, 1)
+                            + (cause != null ? ", cause by " + cause.getMessage() + "." : "."),
+                    interfaceId, providerInfo);
         }
     }
 
@@ -736,6 +785,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             tmp.put("subHealth", new HashSet<ProviderInfo>(subHealthConnections.keySet()));
             tmp.put("retry", new HashSet<ProviderInfo>(retryConnections.keySet()));
             tmp.put("uninitialized", new HashSet<ProviderInfo>(uninitializedConnections.keySet()));
+            tmp.put("all", new HashSet<ProviderInfo>(lastAddresses));
             return tmp;
         } finally {
             providerLock.unlock();
@@ -751,32 +801,32 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      */
     protected boolean doubleCheck(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
         if (transport.isAvailable()) {
-            try { // 睡一下下 防止被连上又被服务端踢下线
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-            if (transport.isAvailable()) { // double check
+            if (!connectionValidate) {
                 return true;
-            } else { // 可能在黑名单里，刚连上就断开了
-                if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
-                    LOGGER.warnWithApp(consumerConfig.getAppName(),
-                        "Connection has been closed after connected (in last 100ms)!" +
-                            " Maybe connectionNum of provider has been reached limit," +
-                            " or your host is in the blacklist of provider {}/{}",
-                        interfaceId, transport.getConfig().getProviderInfo());
+            } else {
+                try { // 睡一下下 防止被连上又被服务端踢下线
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // ignore
                 }
-                providerInfo.setDynamicAttr(ProviderInfoAttrs.ATTR_RC_PERIOD_COEFFICIENT, 5);
-                return false;
+                if (transport.isAvailable()) { // double check
+                    return true;
+                } else { // 可能在黑名单里，刚连上就断开了
+                    if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
+                        LOGGER.warnWithApp(consumerConfig.getAppName(),
+                                "Connection has been closed after connected (in last 100ms)!" +
+                                        " Maybe connectionNum of provider has been reached limit," +
+                                        " or your host is in the blacklist of provider {}/{}",
+                                interfaceId, transport.getConfig().getProviderInfo());
+                    }
+                    providerInfo.setDynamicAttr(ProviderInfoAttrs.ATTR_RC_PERIOD_COEFFICIENT, 5);
+                    return false;
+                }
             }
         } else {
             return false;
         }
     }
-
-    /**
-     * 重连线程
-     */
-    private volatile ScheduledService reconThread;
 
     /**
      * 启动重连+心跳线程
@@ -789,24 +839,19 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         if (reconnect > 0) {
             reconnect = Math.max(reconnect, 2000); // 最小2000
             reconThread = new ScheduledService("CLI-RC-" + interfaceId, ScheduledService.MODE_FIXEDDELAY, new
-                Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            doReconnect();
-                        } catch (Throwable e) {
-                            LOGGER.errorWithApp(consumerConfig.getAppName(),
-                                "Exception when retry connect to provider", e);
+                    Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                doReconnect();
+                            } catch (Throwable e) {
+                                LOGGER.warnWithApp(consumerConfig.getAppName(),
+                                        "Exception when retry connect to provider", e);
+                            }
                         }
-                    }
-                }, reconnect, reconnect, TimeUnit.MILLISECONDS).start();
+                    }, reconnect, reconnect, TimeUnit.MILLISECONDS).start();
         }
     }
-
-    /**
-     * 重试次数标记（针对每个Provider不一样）
-     */
-    private AtomicInteger reconnectFlag = new AtomicInteger();
 
     /**
      * 重连断开和死亡的节点
@@ -825,10 +870,10 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             }
         }
         for (Map.Entry<ProviderInfo, ClientTransport> entry : getRetryConnections()
-            .entrySet()) {
+                .entrySet()) {
             ProviderInfo providerInfo = entry.getKey();
             int providerPeriodCoefficient = CommonUtils.parseNum((Integer)
-                providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_RC_PERIOD_COEFFICIENT), 1);
+                    providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_RC_PERIOD_COEFFICIENT), 1);
             if (thisTime % providerPeriodCoefficient != 0) {
                 continue; // 如果命中重连周期，则进行重连
             }
@@ -846,12 +891,12 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 if (print) {
                     if (LOGGER.isWarnEnabled(appName)) {
                         LOGGER.warnWithApp(appName, "Retry connect to {} provider:{} error ! The exception is " + e
-                            .getMessage(), interfaceId, providerInfo);
+                                .getMessage(), interfaceId, providerInfo);
                     }
                 } else {
                     if (LOGGER.isDebugEnabled(appName)) {
                         LOGGER.debugWithApp(appName, "Retry connect to {} provider:{} error ! The exception is " + e
-                            .getMessage(), interfaceId, providerInfo);
+                                .getMessage(), interfaceId, providerInfo);
                     }
                 }
             }

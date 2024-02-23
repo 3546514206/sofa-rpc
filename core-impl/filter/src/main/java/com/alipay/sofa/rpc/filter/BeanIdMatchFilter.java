@@ -23,33 +23,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  规则id的配置形式：a，b，!c，d
- *                  表示该Filter对bean id为a，b，d的服务生效，对bean id为c的服务不生效。
+ * 规则id的配置形式：a，b，!c，d
+ * 表示该Filter对bean id为a，b，d的服务生效，对bean id为c的服务不生效。
+ * <p>
+ * 规则描述：a，b，c      只对a，b，c生效，其余不生效。
+ * !a，!b，!c   除a，b，c不生效外，其余都生效。
+ * a，!b，!c    除b，c不生效外，其余都生效。
+ * 如果不进行配置，默认对所有服务生效。
  *
- *  规则描述：a，b，c      只对a，b，c生效，其余不生效。
- *           !a，!b，!c   除a，b，c不生效外，其余都生效。
- *           a，!b，!c    除b，c不生效外，其余都生效。
- *           如果不进行配置，默认对所有服务生效。
- * 
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 public abstract class BeanIdMatchFilter extends Filter {
 
-    private static final String ID_SPLIT     = ",";
+    private static final String ID_SPLIT = ",";
 
-    private static final String ID_EXCLUDE   = "!";
-
+    private static final String ID_EXCLUDE = "!";
+    private final Object formatLock = new Object();
     /**
      * 拦截器id规则
      */
-    private String              idRule;
-
-    private boolean             allEffective = true;
-    private List<String>        effectiveId;
-    private List<String>        excludeId;
-
-    private boolean             formatComplete;
-    private Object              formatLock   = new Object();
+    private String idRule;
+    private boolean allEffective = true;
+    private List<String> effectiveId;
+    private List<String> excludeId;
+    private volatile boolean formatComplete;
 
     @Override
     public boolean needToLoad(FilterInvoker invoker) {
@@ -117,7 +114,7 @@ public abstract class BeanIdMatchFilter extends Filter {
     /**
      * Setter method for property <tt>idRule</tt>.
      *
-     * @param idRule  value to be assigned to property idRule
+     * @param idRule value to be assigned to property idRule
      */
     public void setIdRule(String idRule) {
         this.idRule = idRule;

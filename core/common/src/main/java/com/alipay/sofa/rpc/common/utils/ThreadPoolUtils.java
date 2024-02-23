@@ -16,14 +16,7 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 线程池工具类
@@ -40,11 +33,11 @@ public class ThreadPoolUtils {
     /**
      * 高任务优先级，默认10
      */
-    public static int THREAD_PRIORITY_HIGH   = 10;
+    public static int THREAD_PRIORITY_HIGH = 10;
     /**
      * 低任务优先级，默认-10
      */
-    public static int THREAD_PRIORITY_LOW    = -10;
+    public static int THREAD_PRIORITY_LOW = -10;
 
     /**
      * 固定大小线程池，无队列
@@ -54,10 +47,10 @@ public class ThreadPoolUtils {
      */
     public static ThreadPoolExecutor newFixedThreadPool(int corePoolSize) {
         return new ThreadPoolExecutor(corePoolSize,
-            corePoolSize,
-            0,
-            TimeUnit.MILLISECONDS,
-            new SynchronousQueue<Runnable>());
+                corePoolSize,
+                0,
+                TimeUnit.MILLISECONDS,
+                new SynchronousQueue<Runnable>());
     }
 
     /**
@@ -70,10 +63,10 @@ public class ThreadPoolUtils {
     public static ThreadPoolExecutor newFixedThreadPool(int corePoolSize,
                                                         BlockingQueue<Runnable> queue) {
         return new ThreadPoolExecutor(corePoolSize,
-            corePoolSize,
-            0,
-            TimeUnit.MILLISECONDS,
-            queue);
+                corePoolSize,
+                0,
+                TimeUnit.MILLISECONDS,
+                queue);
     }
 
     /**
@@ -88,11 +81,11 @@ public class ThreadPoolUtils {
                                                         BlockingQueue<Runnable> queue,
                                                         ThreadFactory threadFactory) {
         return new ThreadPoolExecutor(corePoolSize,
-            corePoolSize,
-            0,
-            TimeUnit.MILLISECONDS,
-            queue,
-            threadFactory);
+                corePoolSize,
+                0,
+                TimeUnit.MILLISECONDS,
+                queue,
+                threadFactory);
     }
 
     /**
@@ -109,12 +102,12 @@ public class ThreadPoolUtils {
                                                         ThreadFactory threadFactory,
                                                         RejectedExecutionHandler handler) {
         return new ThreadPoolExecutor(corePoolSize,
-            corePoolSize,
-            0,
-            TimeUnit.MILLISECONDS,
-            queue,
-            threadFactory,
-            handler);
+                corePoolSize,
+                0,
+                TimeUnit.MILLISECONDS,
+                queue,
+                threadFactory,
+                handler);
     }
 
     /**
@@ -127,10 +120,10 @@ public class ThreadPoolUtils {
     public static ThreadPoolExecutor newCachedThreadPool(int corePoolSize,
                                                          int maximumPoolSize) {
         return new ThreadPoolExecutor(corePoolSize,
-            maximumPoolSize,
-            DateUtils.MILLISECONDS_PER_MINUTE,
-            TimeUnit.MILLISECONDS,
-            new SynchronousQueue<Runnable>());
+                maximumPoolSize,
+                DateUtils.MILLISECONDS_PER_MINUTE,
+                TimeUnit.MILLISECONDS,
+                new SynchronousQueue<Runnable>());
     }
 
     /**
@@ -145,10 +138,10 @@ public class ThreadPoolUtils {
                                                          int maximumPoolSize,
                                                          BlockingQueue<Runnable> queue) {
         return new ThreadPoolExecutor(corePoolSize,
-            maximumPoolSize,
-            DateUtils.MILLISECONDS_PER_MINUTE,
-            TimeUnit.MILLISECONDS,
-            queue);
+                maximumPoolSize,
+                DateUtils.MILLISECONDS_PER_MINUTE,
+                TimeUnit.MILLISECONDS,
+                queue);
     }
 
     /**
@@ -165,11 +158,11 @@ public class ThreadPoolUtils {
                                                          BlockingQueue<Runnable> queue,
                                                          ThreadFactory threadFactory) {
         return new ThreadPoolExecutor(corePoolSize,
-            maximumPoolSize,
-            DateUtils.MILLISECONDS_PER_MINUTE,
-            TimeUnit.MILLISECONDS,
-            queue,
-            threadFactory);
+                maximumPoolSize,
+                DateUtils.MILLISECONDS_PER_MINUTE,
+                TimeUnit.MILLISECONDS,
+                queue,
+                threadFactory);
     }
 
     /**
@@ -188,12 +181,12 @@ public class ThreadPoolUtils {
                                                          ThreadFactory threadFactory,
                                                          RejectedExecutionHandler handler) {
         return new ThreadPoolExecutor(corePoolSize,
-            maximumPoolSize,
-            DateUtils.MILLISECONDS_PER_MINUTE,
-            TimeUnit.MILLISECONDS,
-            queue,
-            threadFactory,
-            handler);
+                maximumPoolSize,
+                DateUtils.MILLISECONDS_PER_MINUTE,
+                TimeUnit.MILLISECONDS,
+                queue,
+                threadFactory,
+                handler);
     }
 
     /**
@@ -214,12 +207,12 @@ public class ThreadPoolUtils {
                                                          ThreadFactory threadFactory,
                                                          RejectedExecutionHandler handler) {
         return new ThreadPoolExecutor(corePoolSize,
-            maximumPoolSize,
-            keepAliveTime,
-            TimeUnit.MILLISECONDS,
-            queue,
-            threadFactory,
-            handler);
+                maximumPoolSize,
+                keepAliveTime,
+                TimeUnit.MILLISECONDS,
+                queue,
+                threadFactory,
+                handler);
     }
 
     /**
@@ -246,10 +239,10 @@ public class ThreadPoolUtils {
         } else { // 有限队列或无限队列
             if (isPriority) {
                 queue = size < 0 ? new PriorityBlockingQueue<Runnable>()
-                    : new PriorityBlockingQueue<Runnable>(size);
+                        : new PriorityBlockingQueue<Runnable>(size);
             } else {
                 queue = size < 0 ? new LinkedBlockingQueue<Runnable>()
-                    : new LinkedBlockingQueue<Runnable>(size);
+                        : new LinkedBlockingQueue<Runnable>(size);
             }
         }
         return queue;

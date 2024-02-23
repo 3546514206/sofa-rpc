@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.filter;
 
+import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -27,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class FilterChainTest {
@@ -38,6 +37,7 @@ public class FilterChainTest {
 
         ProviderConfig providerConfig = new ProviderConfig();
         providerConfig.setFilter(Arrays.asList("testChainFilter0", "-testChainFilter8"));
+        providerConfig.setInterfaceId(Serializer.class.getName());
 
         ConsumerConfig consumerConfig = new ConsumerConfig();
         ArrayList<Filter> list = new ArrayList<Filter>();
@@ -48,23 +48,24 @@ public class FilterChainTest {
         list.add(new TestChainFilter4());
         list.add(new ExcludeFilter("-testChainFilter5"));
         consumerConfig.setFilterRef(list);
+        consumerConfig.setInterfaceId(Serializer.class.getName());
 
         // mock provider chain (0,6,7）
         FilterChain providerChain = FilterChain.buildProviderChain(providerConfig,
-            new TestProviderFilterInvoker(providerConfig));
+                new TestProviderFilterInvoker(providerConfig));
         // mock consumer chain（0,7,2,4)
         FilterChain consumerChain = FilterChain.buildConsumerChain(consumerConfig,
-            new TestConsumerFilterInvoker(consumerConfig, providerChain));
+                new TestConsumerFilterInvoker(consumerConfig, providerChain));
         Assert.assertNotNull(consumerChain.getChain());
 
         SofaRequest request = new SofaRequest();
-        request.setMethodArgs(new String[] { "xxx" });
+        request.setMethodArgs(new String[]{"xxx"});
         request.setInvokeType("sync");
         String result = (String) consumerChain.invoke(request).getAppResponse();
         Assert.assertEquals("xxx_q0_q7_q2_q4_q0_q6_q7_s7_s6_s0_s4_s2_s7_s0", result);
 
         request = new SofaRequest();
-        request.setMethodArgs(new String[] { "xxx" });
+        request.setMethodArgs(new String[]{"xxx"});
         request.setInvokeType("callback");
         SofaResponse response = consumerChain.invoke(request);
         consumerChain.onAsyncResponse(consumerConfig, request, response, null);

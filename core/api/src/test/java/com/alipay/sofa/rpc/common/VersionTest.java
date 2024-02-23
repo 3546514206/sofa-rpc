@@ -20,17 +20,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class VersionTest {
 
     @Test
     public void test() {
+        Version version = new Version();
         Assert.assertTrue(Version.BUILD_VERSION.startsWith(Version.VERSION));
         String s = Version.RPC_VERSION / 10000 + "." + Version.RPC_VERSION % 10000 / 100 + "." + Version.RPC_VERSION %
-            100;
+                100;
         Assert.assertTrue(s.startsWith(Version.VERSION));
         Assert.assertTrue(Version.BUILD_VERSION.startsWith(Version.VERSION));
     }

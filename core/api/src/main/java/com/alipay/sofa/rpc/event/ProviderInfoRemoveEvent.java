@@ -27,7 +27,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 public class ProviderInfoRemoveEvent implements Event {
 
     private final ConsumerConfig consumerConfig;
-    private final ProviderGroup  providerGroup;
+    private final ProviderGroup providerGroup;
 
     public ProviderInfoRemoveEvent(ConsumerConfig consumerConfig, ProviderGroup providerGroup) {
         this.consumerConfig = consumerConfig;

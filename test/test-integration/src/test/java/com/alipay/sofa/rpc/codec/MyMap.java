@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.codec;
 import java.util.HashMap;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class MyMap<K, V> extends HashMap<K, V> {

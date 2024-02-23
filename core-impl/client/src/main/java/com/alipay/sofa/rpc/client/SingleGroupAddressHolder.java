@@ -37,20 +37,20 @@ public class SingleGroupAddressHolder extends AddressHolder {
     /**
      * 配置的直连地址列表
      */
-    protected ProviderGroup        directUrlGroup;
+    protected ProviderGroup directUrlGroup;
     /**
      * 注册中心来的地址列表
      */
-    protected ProviderGroup        registryGroup;
+    protected ProviderGroup registryGroup;
 
     /**
      * 地址变化的锁
      */
-    private ReentrantReadWriteLock lock  = new ReentrantReadWriteLock();
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     // 读锁，允许并发读
-    private Lock                   rLock = lock.readLock();
+    private Lock rLock = lock.readLock();
     // 写锁，写的时候不允许读
-    private Lock                   wLock = lock.writeLock();
+    private Lock wLock = lock.writeLock();
 
     /**
      * 构造函数
@@ -78,7 +78,8 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public ProviderGroup getProviderGroup(String groupName) {
         rLock.lock();
         try {
-            return RpcConstants.ADDRESS_DIRECT_GROUP.equals(groupName) ? directUrlGroup : registryGroup;
+            return RpcConstants.ADDRESS_DIRECT_GROUP.equals(groupName) ? directUrlGroup
+                    : registryGroup;
         } finally {
             rLock.unlock();
         }
@@ -99,7 +100,12 @@ public class SingleGroupAddressHolder extends AddressHolder {
 
     @Override
     public int getAllProviderSize() {
-        return directUrlGroup.size() + registryGroup.size();
+        rLock.lock();
+        try {
+            return directUrlGroup.size() + registryGroup.size();
+        } finally {
+            rLock.unlock();
+        }
     }
 
     @Override
@@ -132,7 +138,8 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public void updateProviders(ProviderGroup providerGroup) {
         wLock.lock();
         try {
-            getProviderGroup(providerGroup.getName()).setProviderInfos(new ArrayList(providerGroup.getProviderInfos()));
+            getProviderGroup(providerGroup.getName())
+                    .setProviderInfos(new ArrayList<ProviderInfo>(providerGroup.getProviderInfos()));
         } finally {
             wLock.unlock();
         }

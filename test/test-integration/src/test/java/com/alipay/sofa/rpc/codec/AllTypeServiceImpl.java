@@ -18,15 +18,9 @@ package com.alipay.sofa.rpc.codec;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Currency;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class AllTypeServiceImpl implements AllTypeService {

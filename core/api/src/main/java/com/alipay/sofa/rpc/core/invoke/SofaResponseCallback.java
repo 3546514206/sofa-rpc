@@ -29,27 +29,26 @@ public interface SofaResponseCallback<T> {
      * SOFA RPC will callback this method when server return response success
      *
      * @param appResponse response object
-     * @param methodName the invoked method
-     * @param request the invoked request object
+     * @param methodName  the invoked method
+     * @param request     the invoked request object
      */
-    public void onAppResponse(Object appResponse, String methodName, RequestBase request);
+    void onAppResponse(Object appResponse, String methodName, RequestBase request);
 
     /**
      * SOFA RPC will callback this method when server meet exception
      *
-     * @param throwable app's exception
+     * @param throwable  app's exception
      * @param methodName the invoked method
-     * @param request the invoked request
+     * @param request    the invoked request
      */
-    public void onAppException(Throwable throwable, String methodName, RequestBase request);
+    void onAppException(Throwable throwable, String methodName, RequestBase request);
 
     /**
      * SOFA RPC will callback this method when framework meet exception
      *
      * @param sofaException framework exception
-     *  @param methodName the invoked method
-     * @param request the invoked request object
+     * @param methodName    the invoked method
+     * @param request       the invoked request object
      */
-    public void onSofaException(SofaRpcException sofaException, String methodName,
-                                RequestBase request);
+    void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request);
 }

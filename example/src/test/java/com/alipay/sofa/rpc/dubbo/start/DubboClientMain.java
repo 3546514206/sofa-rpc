@@ -28,7 +28,6 @@ import com.alipay.sofa.rpc.test.HelloService;
  * <p></p>
  * <p>
  *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class DubboClientMain {
@@ -42,24 +41,24 @@ public class DubboClientMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("dubbo-client");
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(HelloService.class.getName())
-            .setBootstrap("dubbo")
-            .setProtocol("dubbo")
-            .setUniqueId("xxx")
-            .setDirectUrl("dubbo://127.0.0.1:20080")
-            .setRegister(false)
-            .setTimeout(3000);
+                .setApplication(applicationConfig)
+                .setInterfaceId(HelloService.class.getName())
+                .setBootstrap("dubbo")
+                .setProtocol("dubbo")
+                .setUniqueId("xxx")
+                .setDirectUrl("dubbo://127.0.0.1:20080")
+                .setRegister(false)
+                .setTimeout(3000);
         HelloService helloService = consumerConfig.refer();
 
         ConsumerConfig<EchoService> consumerConfig2 = new ConsumerConfig<EchoService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(EchoService.class.getName())
-            .setBootstrap("dubbo")
-            .setUniqueId("xxx")
-            .setDirectUrl("dubbo://127.0.0.1:20080")
-            .setRegister(false)
-            .setTimeout(3000);
+                .setApplication(applicationConfig)
+                .setInterfaceId(EchoService.class.getName())
+                .setBootstrap("dubbo")
+                .setUniqueId("xxx")
+                .setDirectUrl("dubbo://127.0.0.1:20080")
+                .setRegister(false)
+                .setTimeout(3000);
         EchoService echoService = consumerConfig2.refer();
 
         LOGGER.error("started at pid {}", RpcRuntimeContext.PID);

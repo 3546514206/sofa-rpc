@@ -25,7 +25,6 @@ import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
 /**
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class FutureServerMain {
@@ -35,21 +34,21 @@ public class FutureServerMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("future-server");
 
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22222)
-            .setDaemon(false);
+                .setPort(22222)
+                .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl(1000))
-            .setServer(serverConfig2);
+                .setApplication(applicationConfig)
+                .setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl(1000))
+                .setServer(serverConfig2);
         providerConfig.export();
 
         ProviderConfig<EchoService> providerConfig2 = new ProviderConfig<EchoService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(EchoService.class.getName())
-            .setRef(new EchoServiceImpl())
-            .setServer(serverConfig2);
+                .setApplication(applicationConfig)
+                .setInterfaceId(EchoService.class.getName())
+                .setRef(new EchoServiceImpl())
+                .setServer(serverConfig2);
         providerConfig2.export();
     }
 }

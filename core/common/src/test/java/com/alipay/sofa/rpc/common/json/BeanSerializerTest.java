@@ -16,17 +16,15 @@
  */
 package com.alipay.sofa.rpc.common.json;
 
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.DateUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
- *
  *
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
@@ -64,6 +62,7 @@ public class BeanSerializerTest {
         } catch (Exception e) {
             error = true;
         }
+        Assert.assertFalse(error);
 
         bean.setName("zzzgg");
         bean.setSex(true);
@@ -74,7 +73,6 @@ public class BeanSerializerTest {
         error = false;
         try {
             Map map = (Map) BeanSerializer.serialize(bean, true);
-            //System.out.println(map);
             Assert.assertEquals(map.get("Name"), "zzzgg");
             Assert.assertEquals(map.get("Sex"), true);
             Assert.assertEquals(map.get("age"), 111);
@@ -83,7 +81,6 @@ public class BeanSerializerTest {
             Assert.assertTrue(map.containsKey(JSON.CLASS_KEY));
 
             map = (Map) BeanSerializer.serialize(bean);
-            //System.out.println(map);
             Assert.assertEquals(map.get("Name"), "zzzgg");
             Assert.assertEquals(map.get("Sex"), true);
             Assert.assertEquals(map.get("age"), 111);
@@ -93,7 +90,7 @@ public class BeanSerializerTest {
         } catch (Exception e) {
             error = true;
         }
-
+        Assert.assertFalse(error);
     }
 
     @Test
@@ -108,18 +105,45 @@ public class BeanSerializerTest {
         map4.put("key2", 222);
 
         Map beanmap5 = new HashMap();
+        try {
+            // name is required
+            BeanSerializer.deserializeByType(beanmap5, TestJsonBean.class);
+            Assert.fail();
+        } catch (Exception e) {
+        }
         beanmap5.put("Name", "zzzzggg");
         beanmap5.put("Sex", true);
         beanmap5.put("age", 22);
         beanmap5.put("friends", new ArrayList<TestJsonBean>());
+        beanmap5.put("vips", new HashSet<TestJsonBean>());
         beanmap5.put("remark", "hehehe");
 
-        TestJsonBean bean = (TestJsonBean) BeanSerializer.deserializeByType(beanmap5, TestJsonBean.class);
+        TestJsonBean bean = BeanSerializer.deserializeByType(beanmap5, TestJsonBean.class);
         Assert.assertEquals(beanmap5.get("Name"), bean.getName());
         Assert.assertEquals(beanmap5.get("Sex"), bean.isSex());
         Assert.assertEquals(beanmap5.get("age"), bean.getAge());
         Assert.assertEquals(beanmap5.get("friends"), bean.getFriends());
         Assert.assertEquals(beanmap5.get("Remark"), bean.getRemark());
+
+        TestJsonBean bean1 = new TestJsonBean();
+        beanmap5.put("friends", new TestJsonBean[]{bean1});
+        bean = BeanSerializer.deserializeByType(beanmap5, TestJsonBean.class);
+        Assert.assertEquals(bean1, bean.getFriends().get(0));
+        beanmap5.put("friends", null);
+        bean = BeanSerializer.deserializeByType(beanmap5, TestJsonBean.class);
+        Assert.assertTrue(CommonUtils.isEmpty(bean.getFriends()));
+        beanmap5.put("friends", "xxxx");
+        try {
+            // invalid type
+            BeanSerializer.deserializeByType(beanmap5, TestJsonBean.class);
+            Assert.fail();
+        } catch (Exception e) {
+        }
+        beanmap5.put("friends", new ArrayList<TestJsonBean>());
+        beanmap5.put("vips", new TestJsonBean[]{bean1});
+        bean = BeanSerializer.deserializeByType(beanmap5, TestJsonBean.class);
+        Assert.assertEquals(bean1, new ArrayList<TestJsonBean>(bean.getVips()).get(0));
+        beanmap5.put("vips", new HashSet<TestJsonBean>());
 
         beanmap5.put(JSON.CLASS_KEY, "com.alipay.sofa.rpc.common.json.TestJsonBean");
         TestJsonBean bean2 = (TestJsonBean) BeanSerializer.deserializeByType(beanmap5, Object.class);
@@ -133,10 +157,10 @@ public class BeanSerializerTest {
         list3.add(map4);
         list3.add(beanmap5);
 
-        int[] ss6 = new int[] { 11, 22, 33, 44 };
-        Integer[] ss7 = new Integer[] { 55, 66 };
+        int[] ss6 = new int[]{11, 22, 33, 44};
+        Integer[] ss7 = new Integer[]{55, 66};
 
-        Object[] args = new Object[] { "11", 22, true, list3, map4, beanmap5, ss6, ss7 };
+        Object[] args = new Object[]{"11", 22, true, list3, map4, beanmap5, ss6, ss7};
         Object[] os = BeanSerializer.deserializeByType(args, Object[].class);
         Assert.assertEquals(os[0], "11");
         Assert.assertEquals(os[1], 22);
@@ -184,4 +208,76 @@ public class BeanSerializerTest {
 
     }
 
+    @Test
+    public void testDeserializeByType() {
+        Assert.assertTrue(0 == BeanSerializer.deserializeByType(null, int.class));
+        Assert.assertTrue(0 == BeanSerializer.deserializeByType(null, long.class));
+        Assert.assertFalse(BeanSerializer.deserializeByType(null, boolean.class));
+
+        Assert.assertArrayEquals(new int[]{123}, BeanSerializer.deserializeByType(Arrays.asList(123), int[].class));
+        Assert.assertFalse(BeanSerializer.deserializeByType(Arrays.asList(123), String.class) instanceof String);
+        Assert.assertTrue(CommonUtils.listEquals(Arrays.asList(123),
+                BeanSerializer.deserializeByType(new int[]{123}, List.class)));
+        Assert.assertTrue(CommonUtils.listEquals(Arrays.asList("xxx"),
+                BeanSerializer.deserializeByType(new String[]{"xxx"}, List.class)));
+
+        Assert.assertEquals(TestJsonBean.Status.START,
+                BeanSerializer.deserializeByType("START", TestJsonBean.Status.class));
+        try {
+            BeanSerializer.deserializeByType(new TestJsonBean(), TestJsonBean.Status.class);
+            Assert.fail();
+        } catch (Exception e) {
+        }
+
+        Date now = new Date();
+        Assert.assertEquals(now, BeanSerializer.deserializeByType(now.getTime(), Date.class));
+        Assert.assertEquals(DateUtils.dateToStr(now), DateUtils.dateToStr(
+                BeanSerializer.deserializeByType(DateUtils.dateToStr(now), Date.class)));
+        try {
+            BeanSerializer.deserializeByType("xxxx", Date.class);
+            Assert.fail();
+        } catch (Exception e) {
+        }
+        try {
+            BeanSerializer.deserializeByType(new TestJsonBean(), Date.class);
+            Assert.fail();
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void serializeMap() {
+        boolean error = false;
+        Map<Object, Object> bean = createTestMap();
+        try {
+            Map map = (Map) BeanSerializer.serialize(bean, true);
+            for (Map.Entry<Object, Object> entry : bean.entrySet()) {
+                if (!map.containsKey(entry.getKey())) {
+                    error = true;
+                    break;
+                }
+            }
+            Assert.assertFalse(error);
+
+            map = (Map) BeanSerializer.serialize(bean);
+            for (Map.Entry<Object, Object> entry : bean.entrySet()) {
+                if (!map.containsKey(entry.getKey())) {
+                    error = true;
+                    break;
+                }
+            }
+            Assert.assertFalse(error);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+    }
+
+    private Map<Object, Object> createTestMap() {
+        Map<Object, Object> map = new HashMap<Object, Object>();
+        map.put(1, "1");
+        map.put("2", 2);
+        map.put("true", true);
+        return map;
+    }
 }

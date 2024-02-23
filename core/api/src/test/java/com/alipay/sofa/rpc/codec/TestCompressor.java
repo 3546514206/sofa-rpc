@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.codec;
 import com.alipay.sofa.rpc.ext.Extension;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Extension(value = "test", code = 113)

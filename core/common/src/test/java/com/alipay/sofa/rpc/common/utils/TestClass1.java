@@ -17,8 +17,6 @@
 package com.alipay.sofa.rpc.common.utils;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public class TestClass1 {

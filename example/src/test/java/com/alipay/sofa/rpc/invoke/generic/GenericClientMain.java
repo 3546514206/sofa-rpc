@@ -25,8 +25,6 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class GenericClientMain {
@@ -37,34 +35,34 @@ public class GenericClientMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("generic-client");
 
         ConsumerConfig<GenericService> consumerConfig = new ConsumerConfig<GenericService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(TestGenericService.class.getName())
-            .setGeneric(true)
-            .setTimeout(50000)
-            .setDirectUrl("bolt://127.0.0.1:22222?appName=generic-server");
+                .setApplication(applicationConfig)
+                .setInterfaceId(TestGenericService.class.getName())
+                .setGeneric(true)
+                .setTimeout(50000)
+                .setDirectUrl("bolt://127.0.0.1:22222?appName=generic-server");
         GenericService testService = consumerConfig.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
 
         while (true) {
             try {
-                String s1 = (String) testService.$invoke("echoStr", new String[] { "java.lang.String" },
-                    new Object[] { "1111" });
+                String s1 = (String) testService.$invoke("echoStr", new String[]{"java.lang.String"},
+                        new Object[]{"1111"});
                 LOGGER.warn("generic return :{}", s1);
 
                 GenericObject genericObject = new GenericObject(
-                    "com.alipay.sofa.rpc.invoke.generic.TestObj");
+                        "com.alipay.sofa.rpc.invoke.generic.TestObj");
                 genericObject.putField("str", "xxxx");
                 genericObject.putField("num", 222);
 
                 GenericObject o2 = (GenericObject) testService.$genericInvoke("echoObj",
-                    new String[] { "com.alipay.sofa.rpc.invoke.generic.TestObj" },
-                    new Object[] { genericObject });
+                        new String[]{"com.alipay.sofa.rpc.invoke.generic.TestObj"},
+                        new Object[]{genericObject});
                 LOGGER.warn("generic return :{}", o2);
 
                 TestObj o3 = testService.$genericInvoke("echoObj",
-                    new String[] { "com.alipay.sofa.rpc.invoke.generic.TestObj" },
-                    new Object[] { genericObject }, TestObj.class);
+                        new String[]{"com.alipay.sofa.rpc.invoke.generic.TestObj"},
+                        new Object[]{genericObject}, TestObj.class);
                 LOGGER.warn("generic return :{}", o3);
 
             } catch (Exception e) {

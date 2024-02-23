@@ -20,13 +20,16 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.log.TimeWaitLogger;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.BiConsumer;
 
 /**
  * 异步执行运行时
@@ -38,7 +41,7 @@ public class AsyncRuntime {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                LOGGER = LoggerFactory.getLogger(AsyncRuntime.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(AsyncRuntime.class);
 
     /**
      * callback业务线程池（callback+async）
@@ -71,29 +74,27 @@ public class AsyncRuntime {
                     int keepAliveTime = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_TIME);
 
                     BlockingQueue<Runnable> queue = ThreadPoolUtils.buildQueue(queuesize);
-                    NamedThreadFactory threadFactory = new NamedThreadFactory("SOFA-RPC-CB", true);
+                    NamedThreadFactory threadFactory = new NamedThreadFactory("RPC-CB", true);
 
                     RejectedExecutionHandler handler = new RejectedExecutionHandler() {
-                        private int i = 1;
+                        private final TimeWaitLogger timeWaitLogger = new TimeWaitLogger(1000);
+                        private final BiConsumer<Runnable, ThreadPoolExecutor> biConsumer = (r, executor) -> LOGGER.warn("Task:{} has been reject because of threadPool exhausted! pool:{}, active:{}, queue:{}, taskcnt: {}", r,
+                                executor.getPoolSize(),
+                                executor.getActiveCount(),
+                                executor.getQueue().size(),
+                                executor.getTaskCount());
 
                         @Override
                         public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                            if (i++ % 7 == 0) {
-                                i = 1;
-                                if (LOGGER.isWarnEnabled()) {
-                                    LOGGER.warn("Task:{} has been reject because of threadPool exhausted!" +
-                                        " pool:{}, active:{}, queue:{}, taskcnt: {}", r,
-                                        executor.getPoolSize(),
-                                        executor.getActiveCount(),
-                                        executor.getQueue().size(),
-                                        executor.getTaskCount());
-                                }
+                            if (LOGGER.isWarnEnabled()) {
+                                timeWaitLogger.logWithBiConsume(biConsumer, r, executor);
                             }
-                            throw new RejectedExecutionException("Callback handler thread pool has bean exhausted");
+                            throw new RejectedExecutionException(
+                                    LogCodes.getLog(LogCodes.ERROR_ASYNC_THREAD_POOL_REJECT));
                         }
                     };
                     asyncThreadPool = ThreadPoolUtils.newCachedThreadPool(
-                        coresize, maxsize, keepAliveTime, queue, threadFactory, handler);
+                            coresize, maxsize, keepAliveTime, queue, threadFactory, handler);
                 }
             }
         }

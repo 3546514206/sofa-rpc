@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class JSONUtilsTest {

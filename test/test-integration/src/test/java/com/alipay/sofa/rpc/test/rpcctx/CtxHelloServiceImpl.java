@@ -21,8 +21,6 @@ import com.alipay.sofa.rpc.api.context.RpcServiceContext;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class CtxHelloServiceImpl extends HelloServiceImpl {

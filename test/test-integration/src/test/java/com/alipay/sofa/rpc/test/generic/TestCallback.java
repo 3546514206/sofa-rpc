@@ -29,8 +29,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class TestCallback implements SofaResponseCallback {
 
-    public volatile static Object          result;
+    public volatile static Object result;
     private volatile static CountDownLatch latch;
+
+    public static void startLatach() throws InterruptedException {
+        latch = new CountDownLatch(1);
+        latch.await(3000, TimeUnit.MILLISECONDS);
+    }
 
     @Override
     public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
@@ -57,10 +62,5 @@ public class TestCallback implements SofaResponseCallback {
                                 RequestBase request) {
         result = sofaException;
         latch.countDown();
-    }
-
-    public static void startLatach() throws InterruptedException {
-        latch = new CountDownLatch(1);
-        latch.await(3000, TimeUnit.MILLISECONDS);
     }
 }

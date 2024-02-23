@@ -20,19 +20,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
-import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
-import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_REGISTRY;
-import static com.alipay.sofa.rpc.common.RpcOptions.REGISTRY_BATCH;
-import static com.alipay.sofa.rpc.common.RpcOptions.REGISTRY_BATCH_SIZE;
-import static com.alipay.sofa.rpc.common.RpcOptions.REGISTRY_CONNECT_TIMEOUT;
-import static com.alipay.sofa.rpc.common.RpcOptions.REGISTRY_HEARTBEAT_PERIOD;
-import static com.alipay.sofa.rpc.common.RpcOptions.REGISTRY_INDEX_ADDRESS;
-import static com.alipay.sofa.rpc.common.RpcOptions.REGISTRY_INVOKE_TIMEOUT;
-import static com.alipay.sofa.rpc.common.RpcOptions.REGISTRY_RECONNECT_PERIOD;
-import static com.alipay.sofa.rpc.common.RpcOptions.SERVICE_REGISTER;
-import static com.alipay.sofa.rpc.common.RpcOptions.SERVICE_SUBSCRIBE;
+import static com.alipay.sofa.rpc.common.RpcConfigs.*;
+import static com.alipay.sofa.rpc.common.RpcOptions.*;
 
 /**
  * 注册中心配置
@@ -43,72 +32,59 @@ public class RegistryConfig extends AbstractIdConfig implements Serializable {
     /**
      * The constant serialVersionUID.
      */
-    private static final long     serialVersionUID = -2921019924557602234L;
-
-    /**
-     * 协议
-     */
-    private String                protocol         = getStringValue(DEFAULT_REGISTRY);
-
-    /**
-     * 指定注册中心的地址, 和index必须填一个，address优先
-     */
-    private String                address;
-
-    /**
-     * 指定注册中心寻址服务的地址, 和address必须填一个
-     */
-    private String                index            = getStringValue(REGISTRY_INDEX_ADDRESS);
-
-    /**
-     * 是否注册，如果是false只订阅不注册
-     */
-    private boolean               register         = getBooleanValue(SERVICE_REGISTER);
-
-    /**
-     * 是否订阅服务
-     */
-    private boolean               subscribe        = getBooleanValue(SERVICE_SUBSCRIBE);
-
-    /**
-     * 调用注册中心超时时间
-     */
-    private int                   timeout          = getIntValue(REGISTRY_INVOKE_TIMEOUT);
-
-    /**
-     * 连接注册中心超时时间
-     */
-    private int                   connectTimeout   = getIntValue(REGISTRY_CONNECT_TIMEOUT);
-
-    /**
-     * 保存到本地文件的位置，默认$HOME下
-     */
-    private String                file;
-
-    /**
-     * 是否批量操作
-     */
-    private boolean               batch            = getBooleanValue(REGISTRY_BATCH);
-
-    /**
-     * 定时批量检查时的条目数
-     */
-    private int                   batchSize        = getIntValue(REGISTRY_BATCH_SIZE);
-
+    private static final long serialVersionUID = -2921019924557602234L;
     /**
      * Consumer给Provider发心跳的间隔
      */
-    protected int                 heartbeatPeriod  = getIntValue(REGISTRY_HEARTBEAT_PERIOD);
-
+    protected int heartbeatPeriod = getIntValue(REGISTRY_HEARTBEAT_PERIOD);
     /**
      * Consumer给Provider重连的间隔
      */
-    protected int                 reconnectPeriod  = getIntValue(REGISTRY_RECONNECT_PERIOD);
-
+    protected int reconnectPeriod = getIntValue(REGISTRY_RECONNECT_PERIOD);
     /**
      * The Parameters. 自定义参数
      */
     protected Map<String, String> parameters;
+    /**
+     * 协议
+     */
+    private String protocol = getStringValue(DEFAULT_REGISTRY);
+    /**
+     * 指定注册中心的地址, 和index必须填一个，address优先
+     */
+    private String address;
+    /**
+     * 指定注册中心寻址服务的地址, 和address必须填一个
+     */
+    private String index = getStringValue(REGISTRY_INDEX_ADDRESS);
+    /**
+     * 是否注册，如果是false只订阅不注册
+     */
+    private boolean register = getBooleanValue(SERVICE_REGISTER);
+    /**
+     * 是否订阅服务
+     */
+    private boolean subscribe = getBooleanValue(SERVICE_SUBSCRIBE);
+    /**
+     * 调用注册中心超时时间
+     */
+    private int timeout = getIntValue(REGISTRY_INVOKE_TIMEOUT);
+    /**
+     * 连接注册中心超时时间
+     */
+    private int connectTimeout = getIntValue(REGISTRY_CONNECT_TIMEOUT);
+    /**
+     * 保存到本地文件的位置，默认$HOME下
+     */
+    private String file;
+    /**
+     * 是否批量操作
+     */
+    private boolean batch = getBooleanValue(REGISTRY_BATCH);
+    /**
+     * 定时批量检查时的条目数
+     */
+    private int batchSize = getIntValue(REGISTRY_BATCH_SIZE);
 
     /**
      * Gets protocol.
@@ -366,7 +342,10 @@ public class RegistryConfig extends AbstractIdConfig implements Serializable {
      * @return the RegistryConfig
      */
     public RegistryConfig setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
+        if (this.parameters == null) {
+            this.parameters = new ConcurrentHashMap<String, String>();
+            this.parameters.putAll(parameters);
+        }
         return this;
     }
 
@@ -398,20 +377,20 @@ public class RegistryConfig extends AbstractIdConfig implements Serializable {
     @Override
     public String toString() {
         return "RegistryConfig{" +
-            "protocol='" + protocol + '\'' +
-            ", address='" + address + '\'' +
-            ", index='" + index + '\'' +
-            ", register=" + register +
-            ", subscribe=" + subscribe +
-            ", timeout=" + timeout +
-            ", connectTimeout=" + connectTimeout +
-            ", file='" + file + '\'' +
-            ", batch=" + batch +
-            ", batchSize=" + batchSize +
-            ", heartbeatPeriod=" + heartbeatPeriod +
-            ", reconnectPeriod=" + reconnectPeriod +
-            ", parameters=" + parameters +
-            '}';
+                "protocol='" + protocol + '\'' +
+                ", address='" + address + '\'' +
+                ", index='" + index + '\'' +
+                ", register=" + register +
+                ", subscribe=" + subscribe +
+                ", timeout=" + timeout +
+                ", connectTimeout=" + connectTimeout +
+                ", file='" + file + '\'' +
+                ", batch=" + batch +
+                ", batchSize=" + batchSize +
+                ", heartbeatPeriod=" + heartbeatPeriod +
+                ", reconnectPeriod=" + reconnectPeriod +
+                ", parameters=" + parameters +
+                '}';
     }
 
     @Override

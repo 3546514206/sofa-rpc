@@ -28,56 +28,96 @@ import java.io.Serializable;
  */
 public abstract class RequestBase implements Serializable {
 
-    private static final long  serialVersionUID = -7323141575870688636L;
+    private static final long serialVersionUID = -7323141575870688636L;
 
     /**
-     * 方法名
+     * Method name
      */
-    private String             methodName;
+    private String methodName;
 
     /**
-     * 方法参数签名invoke method arguments name
+     * Argument type strings of method
      */
-    private String[]           methodArgSigs;
+    private String[] methodArgSigs;
 
     /**
-     * 方法参数值 invoke method arguments object
+     * Argument values of method
      */
     private transient Object[] methodArgs;
 
     /**
-     * 服务唯一名称 traget service unique name
+     * Target service unique name, contains interfaceName, uniqueId and etc.
      */
-    private String             targetServiceUniqueName;
+    private String targetServiceUniqueName;
 
+    /**
+     * Gets method name.
+     *
+     * @return the method name
+     */
     public String getMethodName() {
         return methodName;
     }
 
-    public Object[] getMethodArgs() {
-        return methodArgs;
-    }
-
-    public String[] getMethodArgSigs() {
-        return methodArgSigs;
-    }
-
-    public String getTargetServiceUniqueName() {
-        return targetServiceUniqueName;
-    }
-
+    /**
+     * Sets method name.
+     *
+     * @param methodName the method name
+     */
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
 
+    /**
+     * Get method args object [ ].
+     *
+     * @return the object [ ]
+     */
+    public Object[] getMethodArgs() {
+        return methodArgs;
+    }
+
+    /**
+     * Sets method args.
+     *
+     * @param methodArgs the method args
+     */
     public void setMethodArgs(Object[] methodArgs) {
         this.methodArgs = methodArgs;
     }
 
+    /**
+     * Get method arg sigs string [ ].
+     *
+     * @return the string [ ]
+     */
+    public String[] getMethodArgSigs() {
+        return methodArgSigs;
+    }
+
+    /**
+     * Sets method arg sigs.
+     *
+     * @param methodArgSigs the method arg sigs
+     */
     public void setMethodArgSigs(String[] methodArgSigs) {
         this.methodArgSigs = methodArgSigs;
     }
 
+    /**
+     * Gets target service unique name.
+     *
+     * @return the target service unique name
+     */
+    public String getTargetServiceUniqueName() {
+        return targetServiceUniqueName;
+    }
+
+    /**
+     * Sets target service unique name.
+     *
+     * @param targetServiceUniqueName the target service unique name
+     */
     public void setTargetServiceUniqueName(String targetServiceUniqueName) {
         this.targetServiceUniqueName = targetServiceUniqueName;
     }

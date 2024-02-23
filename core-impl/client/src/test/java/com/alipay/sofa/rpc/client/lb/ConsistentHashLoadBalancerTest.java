@@ -26,11 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ConsistentHashLoadBalancerTest extends BaseLoadBalancerTest {
+
     @Test
     public void doSelect() throws Exception {
 
@@ -53,8 +52,8 @@ public class ConsistentHashLoadBalancerTest extends BaseLoadBalancerTest {
             cnt.put(port, cnt.get(port) + 1);
         }
         long end = System.currentTimeMillis();
-        System.out.println("elapsed" + (end - start) + "ms");
-        System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+        LOGGER.info("elapsed" + (end - start) + "ms");
+        LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
         int count = 0;
         for (int i = 0; i < size; i++) {

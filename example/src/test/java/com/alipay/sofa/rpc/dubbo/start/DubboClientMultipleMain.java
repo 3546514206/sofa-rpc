@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p></p>
  * <p>
  *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class DubboClientMultipleMain {
@@ -47,24 +46,24 @@ public class DubboClientMultipleMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("dubbo-client");
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(HelloService.class.getName())
-            .setBootstrap("dubbo")
-            .setProtocol("dubbo")
-            .setUniqueId("xxx")
-            .setTimeout(5000)
-            .setDirectUrl("dubbo://127.0.0.1:20080")
-            .setRegister(false);
+                .setApplication(applicationConfig)
+                .setInterfaceId(HelloService.class.getName())
+                .setBootstrap("dubbo")
+                .setProtocol("dubbo")
+                .setUniqueId("xxx")
+                .setTimeout(5000)
+                .setDirectUrl("dubbo://127.0.0.1:20080")
+                .setRegister(false);
         HelloService helloService = consumerConfig.refer();
 
         ConsumerConfig<EchoService> consumerConfig2 = new ConsumerConfig<EchoService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(EchoService.class.getName())
-            .setBootstrap("dubbo")
-            .setUniqueId("xxx")
-            .setTimeout(5000)
-            .setDirectUrl("dubbo://127.0.0.1:20080")
-            .setRegister(false);
+                .setApplication(applicationConfig)
+                .setInterfaceId(EchoService.class.getName())
+                .setBootstrap("dubbo")
+                .setUniqueId("xxx")
+                .setTimeout(5000)
+                .setDirectUrl("dubbo://127.0.0.1:20080")
+                .setRegister(false);
         final EchoService echoService = consumerConfig2.refer();
 
         LOGGER.error("started at pid {}", RpcRuntimeContext.PID);
@@ -72,7 +71,7 @@ public class DubboClientMultipleMain {
         final int threads = 50;
         final AtomicLong cnt = new AtomicLong(0);
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-            new SynchronousQueue<Runnable>());// 无队列
+                new SynchronousQueue<Runnable>());// 无队列
         for (int i = 0; i < threads; i++) {
             service1.execute(new Runnable() {
                 @Override

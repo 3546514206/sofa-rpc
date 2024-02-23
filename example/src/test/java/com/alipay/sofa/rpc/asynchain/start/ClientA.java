@@ -19,28 +19,31 @@ package com.alipay.sofa.rpc.asynchain.start;
 import com.alipay.sofa.rpc.asynchain.ServiceB;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ClientA {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ClientA.class);
+
     public static void main(String[] args) {
         // A 服务
         ConsumerConfig<ServiceB> consumerConfig = new ConsumerConfig<ServiceB>()
-            .setApplication(new ApplicationConfig().setAppName("AAA"))
-            .setInterfaceId(ServiceB.class.getName())
-            .setDirectUrl("bolt://127.0.0.1:12298?appName=BBB")
-            .setRegister(false)
-            .setTimeout(3000);
+                .setApplication(new ApplicationConfig().setAppName("AAA"))
+                .setInterfaceId(ServiceB.class.getName())
+                .setDirectUrl("bolt://127.0.0.1:12298?appName=BBB")
+                .setRegister(false)
+                .setTimeout(3000);
 
         ServiceB serviceB = consumerConfig.refer();
 
         while (true) {
             try {
                 int ret0 = serviceB.getInt(999);
-                System.out.println("ret0:" + ret0);
+                LOGGER.info("ret0:" + ret0);
             } catch (Exception e) {
                 e.printStackTrace();
             }

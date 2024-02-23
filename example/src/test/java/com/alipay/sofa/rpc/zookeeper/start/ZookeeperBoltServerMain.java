@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.zookeeper.start;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -31,7 +32,6 @@ import com.alipay.sofa.rpc.test.HelloServiceImpl;
  * <p></p>
  * <p>
  *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class ZookeeperBoltServerMain {
@@ -46,30 +46,30 @@ public class ZookeeperBoltServerMain {
         /**
          * 运行需要pom.xml里增加依赖 
          <dependency>
-             <groupId>org.apache.curator</groupId>
-             <artifactId>curator-recipes</artifactId>
-             <scope>test</scope>
+         <groupId>org.apache.curator</groupId>
+         <artifactId>curator-recipes</artifactId>
+         <scope>test</scope>
          </dependency>
          */
         RegistryConfig registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
-            .setAddress("127.0.0.1:2181");
+                .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
+                .setAddress("127.0.0.1:2181");
 
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(22101)
-            .setDaemon(false);
+                .setPort(22101)
+                .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl("result from 22101"))
-            .setServer(serverConfig)
-            .setRegistry(registryConfig);
+                .setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl("result from 22101"))
+                .setServer(serverConfig)
+                .setRegistry(registryConfig);
 
         ProviderConfig<EchoService> providerConfig2 = new ProviderConfig<EchoService>()
-            .setInterfaceId(EchoService.class.getName())
-            .setRef(new EchoServiceImpl())
-            .setServer(serverConfig)
-            .setRegistry(registryConfig);
+                .setInterfaceId(EchoService.class.getName())
+                .setRef(new EchoServiceImpl())
+                .setServer(serverConfig)
+                .setRegistry(registryConfig);
 
         providerConfig.export();
         providerConfig2.export();

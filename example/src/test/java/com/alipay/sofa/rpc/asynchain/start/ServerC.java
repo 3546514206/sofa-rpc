@@ -23,23 +23,21 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ServerC {
 
     public static void main(String[] args) {
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(12299)
-            .setDaemon(false);
+                .setPort(12299)
+                .setDaemon(false);
 
         ProviderConfig<ServiceC> providerConfig = new ProviderConfig<ServiceC>()
-            .setInterfaceId(ServiceC.class.getName())
-            .setApplication(new ApplicationConfig().setAppName("CCC"))
-            .setRef(new ServiceCImpl(1000))
-            .setServer(serverConfig)
-            .setRegister(false);
+                .setInterfaceId(ServiceC.class.getName())
+                .setApplication(new ApplicationConfig().setAppName("CCC"))
+                .setRef(new ServiceCImpl(1000))
+                .setServer(serverConfig)
+                .setRegister(false);
 
         providerConfig.export();
     }

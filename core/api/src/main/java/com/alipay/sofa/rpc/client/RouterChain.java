@@ -30,11 +30,7 @@ import com.alipay.sofa.rpc.filter.AutoActive;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -48,50 +44,25 @@ public class RouterChain {
     /**
      * LOGGER
      */
-    private static final Logger                              LOGGER                = LoggerFactory
-                                                                                       .getLogger(RouterChain.class);
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(RouterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
     private final static Map<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = Collections
-                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
+            .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
     private final static Map<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = Collections
-                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
+            .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Router>             EXTENSION_LOADER      = buildLoader();
-
-    private static ExtensionLoader<Router> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(Router.class, new ExtensionLoaderListener<Router>() {
-            @Override
-            public void onLoad(ExtensionClass<Router> extensionClass) {
-                Class<? extends Router> implClass = extensionClass.getClazz();
-                // 读取自动加载的类列表。
-                AutoActive autoActive = implClass.getAnnotation(AutoActive.class);
-                if (autoActive != null) {
-                    String alias = extensionClass.getAlias();
-                    if (autoActive.providerSide()) {
-                        PROVIDER_AUTO_ACTIVES.put(alias, extensionClass);
-                    }
-                    if (autoActive.consumerSide()) {
-                        CONSUMER_AUTO_ACTIVES.put(alias, extensionClass);
-                    }
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Extension of interface " + Router.class + ", " + implClass + "(" + alias +
-                            ") will auto active");
-                    }
-                }
-            }
-        });
-    }
-
+    private final static ExtensionLoader<Router> EXTENSION_LOADER = buildLoader();
     /**
      * 调用链
      */
@@ -109,18 +80,30 @@ public class RouterChain {
         }
     }
 
-    /**
-     * 筛选Provider
-     *
-     * @param request       本次调用（可以得到类名，方法名，方法参数，参数值等）
-     * @param providerInfos providers（<b>当前可用</b>的服务Provider列表）
-     * @return 路由匹配的服务Provider列表
-     */
-    public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
-        for (Router router : routers) {
-            providerInfos = router.route(request, providerInfos);
-        }
-        return providerInfos;
+    private static ExtensionLoader<Router> buildLoader() {
+        ExtensionLoader<Router> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Router.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<Router>() {
+            @Override
+            public void onLoad(ExtensionClass<Router> extensionClass) {
+                Class<? extends Router> implClass = extensionClass.getClazz();
+                // 读取自动加载的类列表。
+                AutoActive autoActive = implClass.getAnnotation(AutoActive.class);
+                if (autoActive != null) {
+                    String alias = extensionClass.getAlias();
+                    if (autoActive.providerSide()) {
+                        PROVIDER_AUTO_ACTIVES.put(alias, extensionClass);
+                    }
+                    if (autoActive.consumerSide()) {
+                        CONSUMER_AUTO_ACTIVES.put(alias, extensionClass);
+                    }
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Extension of interface " + Router.class + ", " + implClass + "(" + alias +
+                                ") will auto active");
+                    }
+                }
+            }
+        });
+        return extensionLoader;
     }
 
     /**
@@ -132,7 +115,7 @@ public class RouterChain {
     public static RouterChain buildConsumerChain(ConsumerBootstrap consumerBootstrap) {
         ConsumerConfig<?> consumerConfig = consumerBootstrap.getConsumerConfig();
         List<Router> customRouters = consumerConfig.getRouterRef() == null ? new ArrayList<Router>()
-            : new CopyOnWriteArrayList<Router>(consumerConfig.getRouterRef());
+                : new CopyOnWriteArrayList<Router>(consumerConfig.getRouterRef());
         // 先解析是否有特殊处理
         HashSet<String> excludes = parseExcludeRouter(customRouters);
 
@@ -187,7 +170,7 @@ public class RouterChain {
                     String excludeName = excludeRouter.getExcludeName();
                     if (StringUtils.isNotEmpty(excludeName)) {
                         String excludeRouterName = startsWithExcludePrefix(excludeName) ? excludeName.substring(1)
-                            : excludeName;
+                                : excludeName;
                         if (StringUtils.isNotEmpty(excludeRouterName)) {
                             excludeKeys.add(excludeRouterName);
                         }
@@ -207,5 +190,19 @@ public class RouterChain {
     private static boolean startsWithExcludePrefix(String excludeName) {
         char c = excludeName.charAt(0);
         return c == '-' || c == '!';
+    }
+
+    /**
+     * 筛选Provider
+     *
+     * @param request       本次调用（可以得到类名，方法名，方法参数，参数值等）
+     * @param providerInfos providers（<b>当前可用</b>的服务Provider列表）
+     * @return 路由匹配的服务Provider列表
+     */
+    public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
+        for (Router router : routers) {
+            providerInfos = router.route(request, providerInfos);
+        }
+        return providerInfos;
     }
 }

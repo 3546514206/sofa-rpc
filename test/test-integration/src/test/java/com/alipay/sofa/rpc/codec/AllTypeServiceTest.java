@@ -28,27 +28,11 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class AllTypeServiceTest extends ActivelyDestroyTest {
@@ -56,21 +40,21 @@ public class AllTypeServiceTest extends ActivelyDestroyTest {
     @Test
     public void testAll() {
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22222)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-            .setDaemon(false);
+                .setPort(22222)
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+                .setDaemon(false);
 
         ProviderConfig<AllTypeService> CProvider = new ProviderConfig<AllTypeService>()
-            .setInterfaceId(AllTypeService.class.getName())
-            .setRef(new AllTypeServiceImpl())
-            .setServer(serverConfig2);
+                .setInterfaceId(AllTypeService.class.getName())
+                .setRef(new AllTypeServiceImpl())
+                .setServer(serverConfig2);
         CProvider.export();
 
         ConsumerConfig<AllTypeService> BConsumer = new ConsumerConfig<AllTypeService>()
-            .setInterfaceId(AllTypeService.class.getName())
-            .setTimeout(50000)
-            .setSerialization("hessian")
-            .setDirectUrl("bolt://127.0.0.1:22222");
+                .setInterfaceId(AllTypeService.class.getName())
+                .setTimeout(50000)
+                .setSerialization("hessian")
+                .setDirectUrl("bolt://127.0.0.1:22222");
         AllTypeService helloService = BConsumer.refer();
 
         // 基本类型和数组
@@ -82,9 +66,9 @@ public class AllTypeServiceTest extends ActivelyDestroyTest {
         Assert.assertEquals(AllTypeEnum2.TB, helloService.echoEnum2(AllTypeEnum2.TB));
 
         Assert
-            .assertArrayEquals(new String[] { "11", "22" }, helloService.echoStringArray(new String[] { "11", "22" }));
-        Assert.assertArrayEquals(new String[][] { { "aa", "bb" }, { "11", "22" } },
-            helloService.echoStringArray2(new String[][] { { "aa", "bb" }, { "11", "22" } }));
+                .assertArrayEquals(new String[]{"11", "22"}, helloService.echoStringArray(new String[]{"11", "22"}));
+        Assert.assertArrayEquals(new String[][]{{"aa", "bb"}, {"11", "22"}},
+                helloService.echoStringArray2(new String[][]{{"aa", "bb"}, {"11", "22"}}));
 
         // 集合
         List<String> list = new ArrayList<String>();
@@ -190,13 +174,13 @@ public class AllTypeServiceTest extends ActivelyDestroyTest {
 
         {
             ConsumerConfig<AllTypeService> aConsumer = new ConsumerConfig<AllTypeService>()
-                .setInterfaceId(AllTypeService.class.getName())
-                .setTimeout(50000)
-                .setSerialization("hessian")
-                .setRepeatedReferLimit(-1)
-                .setProxy("javassist")
-                .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
-                .setDirectUrl("bolt://127.0.0.1:22222");
+                    .setInterfaceId(AllTypeService.class.getName())
+                    .setTimeout(50000)
+                    .setSerialization("hessian")
+                    .setRepeatedReferLimit(-1)
+                    .setProxy("javassist")
+                    .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
+                    .setDirectUrl("bolt://127.0.0.1:22222");
             AllTypeService helloService2 = aConsumer.refer();
             Assert.assertEquals(0, helloService2.echoInt(1));
             boolean error = false;
@@ -212,13 +196,13 @@ public class AllTypeServiceTest extends ActivelyDestroyTest {
 
         {
             ConsumerConfig<AllTypeService> aConsumer = new ConsumerConfig<AllTypeService>()
-                .setInterfaceId(AllTypeService.class.getName())
-                .setTimeout(50000)
-                .setSerialization("hessian")
-                .setRepeatedReferLimit(-1)
-                .setProxy("jdk")
-                .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
-                .setDirectUrl("bolt://127.0.0.1:22222");
+                    .setInterfaceId(AllTypeService.class.getName())
+                    .setTimeout(50000)
+                    .setSerialization("hessian")
+                    .setRepeatedReferLimit(-1)
+                    .setProxy("jdk")
+                    .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
+                    .setDirectUrl("bolt://127.0.0.1:22222");
             AllTypeService helloService2 = aConsumer.refer();
             Assert.assertEquals(0, helloService2.echoInt(1));
             boolean error = false;

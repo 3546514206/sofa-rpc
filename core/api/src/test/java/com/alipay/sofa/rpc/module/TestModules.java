@@ -17,13 +17,11 @@
 package com.alipay.sofa.rpc.module;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class TestModules {
     static boolean error = false;
-    static String  test;
-    static String  test2;
-    static String  testNot;
+    static String test;
+    static String test2;
+    static String testNot;
 }

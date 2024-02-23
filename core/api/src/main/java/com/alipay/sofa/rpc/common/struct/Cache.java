@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.common.struct;
 
 /**
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public interface Cache {
@@ -29,7 +28,7 @@ public interface Cache {
      * @param args        方法参数
      * @return 关键字，可以返回null
      */
-    public Object buildKey(String interfaceId, String methodName, Object[] args);
+    Object buildKey(String interfaceId, String methodName, Object[] args);
 
     /**
      * 放入缓存
@@ -37,7 +36,7 @@ public interface Cache {
      * @param key    方法参数得到的关键字
      * @param result 缓存的调用结果
      */
-    public void put(Object key, Object result);
+    void put(Object key, Object result);
 
     /**
      * 拿出缓存
@@ -45,5 +44,5 @@ public interface Cache {
      * @param key 方法参数得到的关键字
      * @return 缓存的调用结果
      */
-    public Object get(Object key);
+    Object get(Object key);
 }

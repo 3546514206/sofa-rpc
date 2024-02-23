@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.extension;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 public class ExtensionMain {

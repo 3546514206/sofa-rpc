@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.transport;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -29,6 +28,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
 import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
 import java.lang.reflect.InvocationTargetException;
@@ -46,29 +46,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractProxyClientTransport extends ClientTransport {
 
     /**
-     * 代理类，例如cxf或resteasy生成的代理
-     */
-    private Object                   proxy;
-
-    /**
-     * 是否已连接（默认可连接，直到连不上）
-     */
-    private boolean                  open;
-
-    /**
      * 本地地址
      */
-    protected InetSocketAddress      localAddress;
-
+    protected InetSocketAddress localAddress;
     /**
      * 远程地址
      */
-    protected InetSocketAddress      remoteAddress;
-
+    protected InetSocketAddress remoteAddress;
     /**
      * 正在发送的调用数量
      */
     protected volatile AtomicInteger currentRequests = new AtomicInteger(0);
+    /**
+     * 代理类，例如cxf或resteasy生成的代理
+     */
+    private Object proxy;
+    /**
+     * 是否已连接（默认可连接，直到连不上）
+     */
+    private boolean open;
 
     /**
      * 构造函数
@@ -80,12 +76,14 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
         ProviderInfo provider = transportConfig.getProviderInfo();
         try {
             proxy = buildProxy(transportConfig);
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Fail to build proxy client of consumer!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_PROXY), e);
         }
         // 能telnet通
         open = proxy != null && NetUtils.canTelnet(provider.getHost(), provider.getPort(),
-            transportConfig.getConnectTimeout());
+                transportConfig.getConnectTimeout());
         remoteAddress = InetSocketAddress.createUnresolved(provider.getHost(), provider.getPort());
         localAddress = InetSocketAddress.createUnresolved(SystemInfo.getLocalHost(), 0);// 端口不准
     }
@@ -103,7 +101,7 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
     public void connect() {
         ProviderInfo provider = transportConfig.getProviderInfo();
         open = NetUtils.canTelnet(provider.getHost(), provider.getPort(),
-            transportConfig.getConnectTimeout());
+                transportConfig.getConnectTimeout());
     }
 
     @Override
@@ -122,12 +120,12 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
     }
 
     @Override
-    public void setChannel(AbstractChannel channel) {
+    public AbstractChannel getChannel() {
         throw new UnsupportedOperationException("Not supported");
     }
 
     @Override
-    public AbstractChannel getChannel() {
+    public void setChannel(AbstractChannel channel) {
         throw new UnsupportedOperationException("Not supported");
     }
 
@@ -170,13 +168,13 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
             throw e;
         } catch (Exception e) {
             throwable = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                "Failed to send message to remote", e);
+                    "Failed to send message to remote", e);
             throw throwable;
         } finally {
             afterSend(context, request);
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
-                EventBus.post(new ClientSyncReceiveEvent((ConsumerConfig) context.getInterfaceConfig(),
-                    context.getProviderInfo(), request, response, throwable));
+                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
+                        transportConfig.getProviderInfo(), request, response, throwable));
             }
         }
     }
@@ -191,12 +189,12 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
      * @since 5.2.0
      */
     protected SofaResponse doInvokeSync(SofaRequest request, int timeoutMillis)
-        throws InvocationTargetException, IllegalAccessException {
+            throws InvocationTargetException, IllegalAccessException {
         SofaResponse response = new SofaResponse();
         Method method = getMethod(request);
         if (method == null) {
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                "Not found method :" + request.getInterfaceName() + "." + request.getMethodName());
+                    "Not found method :" + request.getInterfaceName() + "." + request.getMethodName());
         }
         Object o = method.invoke(proxy, request.getMethodArgs());
         response.setAppResponse(o);
@@ -241,19 +239,19 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
                 } else if (realException instanceof ConnectException) {
                     open = false;
                     exception = new SofaRpcException(RpcErrorType.CLIENT_NETWORK,
-                        "Connect to remote " + transportConfig.getProviderInfo()
-                            + " error!", realException);
+                            "Connect to remote " + transportConfig.getProviderInfo()
+                                    + " error!", realException);
                 } else {
                     exception = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                        "Send message to remote catch error: " + realException.getMessage(), realException);
+                            "Send message to remote catch error: " + realException.getMessage(), realException);
                 }
             } else {
                 exception = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Send message to remote catch error: " + ie.getMessage(), ie);
+                        "Send message to remote catch error: " + ie.getMessage(), ie);
             }
         } else {
             exception = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                "Send message to remote catch error: " + e.getMessage(), e);
+                    "Send message to remote catch error: " + e.getMessage(), e);
         }
         return exception;
     }

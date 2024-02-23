@@ -25,8 +25,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public abstract class BaggageBaseTest extends ActivelyDestroyTest {

@@ -17,12 +17,11 @@
 package com.alipay.sofa.rpc.test;
 
 /**
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class HelloServiceImpl implements HelloService {
 
-    private int    sleep;
+    private int sleep;
 
     private String result;
 

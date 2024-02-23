@@ -71,9 +71,9 @@ public abstract class Tracer {
     /**
      * 记录日志
      *
-     * @param profileApp    应用
-     * @param code    编码
-     * @param message 消息
+     * @param profileApp 应用
+     * @param code       编码
+     * @param message    消息
      */
     public abstract void profile(String profileApp, String code, String message);
 
@@ -90,7 +90,7 @@ public abstract class Tracer {
     public abstract void clientAsyncReceivedPrepare();
 
     /**
-     * 检查状态，在结束调用的时候进行调用，防止资源泄露 
+     * 检查状态，在结束调用的时候进行调用，防止资源泄露
      */
     public abstract void checkState();
 }

@@ -26,11 +26,9 @@ import org.junit.Assert;
 import java.util.Map;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("testChainFilter2")
+@Extension(value = "testChainFilter2", order = 2)
 public class TestChainFilter2 extends Filter {
 
     @Override
@@ -51,7 +49,7 @@ public class TestChainFilter2 extends Filter {
 
     @Override
     public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable throwable)
-        throws SofaRpcException {
+            throws SofaRpcException {
         response.setAppResponse(response.getAppResponse() + "_a2");
     }
 }

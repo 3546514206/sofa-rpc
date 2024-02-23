@@ -17,8 +17,6 @@
 package com.alipay.sofa.rpc.proxy;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public abstract class AbstractTestClass {

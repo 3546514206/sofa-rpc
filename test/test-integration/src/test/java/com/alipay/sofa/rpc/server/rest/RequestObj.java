@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.server.rest;
 import java.io.Serializable;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 public class RequestObj implements Serializable {
@@ -40,7 +39,7 @@ public class RequestObj implements Serializable {
     /**
      * Setter method for property <tt>name</tt>.
      *
-     * @param name  value to be assigned to property name
+     * @param name value to be assigned to property name
      */
     public void setName(String name) {
         this.name = name;
@@ -58,7 +57,7 @@ public class RequestObj implements Serializable {
     /**
      * Setter method for property <tt>age</tt>.
      *
-     * @param age  value to be assigned to property age
+     * @param age value to be assigned to property age
      */
     public void setAge(String age) {
         this.age = age;

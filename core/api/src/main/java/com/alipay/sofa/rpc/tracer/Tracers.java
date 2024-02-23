@@ -21,12 +21,13 @@ import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
  * 包装工具类，自动判断是否启动Tracer。<br>
- * 
+ *
  * <pre>
  * Trace主要分为几个阶段：
  * 0：开始
@@ -51,17 +52,17 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
  */
 public final class Tracers {
 
-    private static final Logger LOGGER    = LoggerFactory.getLogger(Tracers.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Tracers.class);
 
     /**
      * 是否开启Tracer
      */
-    private static boolean      openTrace = false;
+    private static boolean openTrace = false;
 
     /**
      * Tracer实例，启动时初始化
      */
-    private static Tracer       tracer;
+    private static Tracer tracer;
 
     static {
         try {
@@ -74,7 +75,7 @@ public final class Tracers {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to init Tracers", e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_TRACER_INIT), e);
         }
     }
 

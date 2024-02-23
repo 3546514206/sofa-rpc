@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+
 import javax.annotation.Priority;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -23,22 +26,22 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 @Provider
 @Priority(100)
 public class ClientRequestTestFilter2 implements ClientRequestFilter {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ClientRequestTestFilter2.class);
 
     private static String name = "X";
 
-    @Override
-    public void filter(ClientRequestContext requestContext) throws IOException {
-        System.out.println("客户端request filter2生效");
-        name = "A2";
-    }
-
     public static String getName() {
         return name;
+    }
+
+    @Override
+    public void filter(ClientRequestContext requestContext) throws IOException {
+        LOGGER.info("客户端request filter2生效");
+        name = "A2";
     }
 }

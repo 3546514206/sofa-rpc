@@ -23,8 +23,10 @@ import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of protocol
@@ -37,26 +39,30 @@ public class ProtocolFactory {
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
      * 还需要额外保留编码和实例的映射：{编码：协议}
      */
-    private final static ConcurrentHashMap<Byte, Protocol> TYPE_PROTOCOL_MAP = new ConcurrentHashMap<Byte, Protocol>();
+    private final static ConcurrentMap<Byte, Protocol> TYPE_PROTOCOL_MAP = new ConcurrentHashMap<Byte, Protocol>();
 
     /**
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
      * 还需要额外保留编码和实例的映射：{别名：编码}
      */
-    private final static ConcurrentHashMap<String, Byte>   TYPE_CODE_MAP     = new ConcurrentHashMap<String, Byte>();
-
+    private final static ConcurrentMap<String, Byte> TYPE_CODE_MAP = new ConcurrentHashMap<String, Byte>();
+    /**
+     * 最大偏移量，用于一个端口支持多协议时使用
+     */
+    private static int maxMagicOffset;
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Protocol>         EXTENSION_LOADER  = buildLoader();
+    private final static ExtensionLoader<Protocol> EXTENSION_LOADER = buildLoader();
 
     private static ExtensionLoader<Protocol> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(Protocol.class, new ExtensionLoaderListener<Protocol>() {
+        ExtensionLoader<Protocol> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Protocol.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<Protocol>() {
             @Override
             public void onLoad(ExtensionClass<Protocol> extensionClass) {
                 // 除了保留 alias：Protocol外， 需要保留 code：Protocol
                 Protocol protocol = extensionClass
-                    .getExtInstance();
+                        .getExtInstance();
                 TYPE_PROTOCOL_MAP.put(extensionClass.getCode(), protocol);
                 TYPE_CODE_MAP.put(extensionClass.getAlias(), extensionClass.getCode());
                 if (RpcConfigs.getBooleanValue(RpcOptions.TRANSPORT_SERVER_PROTOCOL_ADAPTIVE)) {
@@ -65,6 +71,7 @@ public class ProtocolFactory {
                 }
             }
         });
+        return extensionLoader;
     }
 
     /**
@@ -87,7 +94,7 @@ public class ProtocolFactory {
     public static Protocol getProtocol(byte code) {
         Protocol protocol = TYPE_PROTOCOL_MAP.get(code);
         if (protocol == null) {
-            throw new SofaRpcRuntimeException("Extension Not Found :\"" + code + "\"!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOCOL_NOT_FOUND, code));
         }
         return protocol;
     }
@@ -98,7 +105,7 @@ public class ProtocolFactory {
      * @param protocol 协议的名字
      * @return 协议编码
      */
-    public static byte getCodeByAlias(String protocol) {
+    public static Byte getCodeByAlias(String protocol) {
         return TYPE_CODE_MAP.get(protocol);
     }
 
@@ -116,11 +123,6 @@ public class ProtocolFactory {
         }
         return null;
     }
-
-    /**
-     * 最大偏移量，用于一个端口支持多协议时使用
-     */
-    private static int maxMagicOffset;
 
     /**
      * 注册协议到适配协议

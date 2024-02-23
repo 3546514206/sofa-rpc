@@ -30,8 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.Charset;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class HttpApacheClientMain {
@@ -48,7 +46,7 @@ public class HttpApacheClientMain {
             例如 http://10.23.11.22:11090
          */
         String url = "http://127.0.0.1:8888/rest/post/1234567890";
-        Object[] params = new Object[] { "xxhttpxxx" };
+        Object[] params = new Object[]{"xxhttpxxx"};
         String result = sendByPost(url, params);
         LOGGER.info("result : {}", result);
 
@@ -56,7 +54,7 @@ public class HttpApacheClientMain {
         ExampleObj example = new ExampleObj();
         example.setId(100);
         example.setName("namename");
-        params = new Object[] { example };
+        params = new Object[]{example};
         result = sendByPost(url, params);
         ExampleObj objresult = JSON.parseObject(result, ExampleObj.class);
         LOGGER.info("obj result : {}", objresult);

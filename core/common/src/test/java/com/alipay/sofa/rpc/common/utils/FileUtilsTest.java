@@ -23,8 +23,6 @@ import java.io.File;
 import java.util.List;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class FileUtilsTest {
@@ -56,7 +54,7 @@ public class FileUtilsTest {
     @Test
     public void cleanDirectory() throws Exception {
         String filePath = System.getProperty("java.io.tmpdir") + File.separator
-            + "FileTest" + 1;
+                + "FileTest" + 1;
         FileUtils.string2File(new File(filePath, "xx.tmp"), "helloworld!");
         Assert.assertTrue(new File(filePath, "xx.tmp").exists());
 

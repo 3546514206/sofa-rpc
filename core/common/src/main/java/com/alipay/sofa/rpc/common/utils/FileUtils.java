@@ -18,14 +18,7 @@ package com.alipay.sofa.rpc.common.utils;
 
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +63,7 @@ public class FileUtils {
         // 将冒号去掉 “/”换成“-”
         if (fileName != null) {
             fileName = fileName.replace(":", "").replace(File.separator, "/")
-                .replace("/", "-");
+                    .replace("/", "-");
             if (fileName.startsWith("-")) {
                 fileName = fileName.substring(1);
             }

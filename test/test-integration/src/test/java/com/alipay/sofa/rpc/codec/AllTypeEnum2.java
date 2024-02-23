@@ -17,8 +17,6 @@
 package com.alipay.sofa.rpc.codec;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public enum AllTypeEnum2 {

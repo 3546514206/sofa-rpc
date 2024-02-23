@@ -30,12 +30,7 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
-import com.alipay.sofa.rpc.test.generic.bean.BasicBean;
-import com.alipay.sofa.rpc.test.generic.bean.ComplexBean;
-import com.alipay.sofa.rpc.test.generic.bean.Job;
-import com.alipay.sofa.rpc.test.generic.bean.MyList;
-import com.alipay.sofa.rpc.test.generic.bean.MyMap;
-import com.alipay.sofa.rpc.test.generic.bean.People;
+import com.alipay.sofa.rpc.test.generic.bean.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,40 +49,44 @@ public class GenericTest extends ActivelyDestroyTest {
         // 发布服务
 
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22222)
-            .setDaemon(false);
+                .setPort(22222)
+                .setDaemon(false);
 
         List<MethodConfig> methodConfigs = new ArrayList<MethodConfig>();
         MethodConfig config1 = new MethodConfig().setName("helloFuture").setInvokeType("future");
         methodConfigs.add(config1);
         MethodConfig config2 = new MethodConfig().setName("helloCallback")
-            .setInvokeType("callback").setOnReturn(new TestCallback());
+                .setInvokeType("callback").setOnReturn(new TestCallback());
         methodConfigs.add(config2);
         MethodConfig config21 = new MethodConfig().setName("helloCallbackException")
-            .setInvokeType("callback").setOnReturn(new TestCallback());
+                .setInvokeType("callback").setOnReturn(new TestCallback());
         methodConfigs.add(config21);
         MethodConfig config3 = new MethodConfig().setName("helloOneway")
-            .setInvokeType("oneway");
+                .setInvokeType("oneway");
         methodConfigs.add(config3);
+        MethodConfig config4 = new MethodConfig().setName("helloTimeout")
+                .setInvokeType("sync");
+        methodConfigs.add(config4);
 
         // C服务的服务端
         ProviderConfig<TestInterface> CProvider = new ProviderConfig<TestInterface>()
-            .setInterfaceId(TestInterface.class.getName())
-            .setRef(new TestClass())
-            .setServer(serverConfig2);
+                .setInterfaceId(TestInterface.class.getName())
+                .setRef(new TestClass())
+                .setServer(serverConfig2);
         CProvider.export();
 
         // 引用服务
         ConsumerConfig<GenericService> BConsumer = new ConsumerConfig<GenericService>()
-            .setInterfaceId(TestInterface.class.getName())
-            .setGeneric(true)
-            .setMethods(methodConfigs)
-            .setDirectUrl("bolt://127.0.0.1:22222")
-            .setTimeout(3000);
+                .setInterfaceId(TestInterface.class.getName())
+                .setGeneric(true)
+                .setMethods(methodConfigs)
+                .setDirectUrl("bolt://127.0.0.1:22222")
+                .setTimeout(3000)
+                .setRetries(2);
         GenericService proxy = BConsumer.refer();
 
         GenericObject genericObject = new GenericObject(
-            "com.alipay.sofa.rpc.test.generic.bean.People");
+                "com.alipay.sofa.rpc.test.generic.bean.People");
         genericObject.putField("name", "Lilei");
         genericObject.putField("job", new Job("coder"));
         People people = new People();
@@ -96,87 +95,87 @@ public class GenericTest extends ActivelyDestroyTest {
 
         // sync 调用
         assertEquals(proxy.$invoke("hello",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { people }), new TestClass().hello(people));
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{people}), new TestClass().hello(people));
 
         People peopleResult = proxy.$genericInvoke("hello",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject }, People.class);
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject}, People.class);
 
         assertEquals(peopleResult, new TestClass().hello(people));
 
         GenericObject result = (GenericObject) proxy.$genericInvoke("hello",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject });
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject});
         isCorrect(result);
 
         // future 调用
         proxy.$invoke("helloFuture",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { people });
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{people});
         assertEquals(SofaResponseFuture.getResponse(1000, true),
-            new TestClass().helloFuture(people));
+                new TestClass().helloFuture(people));
 
         proxy.$genericInvoke("helloFuture",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject }, People.class);
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject}, People.class);
         assertEquals(SofaResponseFuture.getResponse(1000, true),
-            new TestClass().helloFuture(people));
+                new TestClass().helloFuture(people));
 
         proxy.$genericInvoke("helloFuture",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject });
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject});
         result = (GenericObject) SofaResponseFuture.getResponse(1000, true);
         isCorrect(result);
 
         // callback调用
         proxy.$invoke("helloCallback",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { people });
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{people});
         TestCallback.startLatach();
         assertEquals(TestCallback.result, new TestClass().helloCallback(people));
 
         proxy.$genericInvoke("helloCallback",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject }, People.class);
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject}, People.class);
         TestCallback.startLatach();
         assertEquals(TestCallback.result, new TestClass().helloCallback(people));
 
         proxy.$genericInvoke("helloCallback",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject });
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject});
         TestCallback.startLatach();
         isCorrect((GenericObject) TestCallback.result);
         TestCallback.result = null;
 
         // oneway调用
-        proxy.$invoke("helloOneway", new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { people });
+        proxy.$invoke("helloOneway", new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{people});
 
         proxy.$genericInvoke("helloOneway",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject }, People.class);
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject}, People.class);
 
         proxy.$genericInvoke("helloOneway",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject });
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject});
 
         // callback出现异常
         proxy.$invoke("helloCallbackException",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { people });
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{people});
         TestCallback.startLatach();
         Assert.assertEquals(((Throwable) TestCallback.result).getMessage(), "Hello~");
 
         proxy.$genericInvoke("helloCallbackException",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject }, People.class);
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject}, People.class);
         TestCallback.startLatach();
         Assert.assertEquals(((Throwable) TestCallback.result).getMessage(), "Hello~");
 
         proxy.$genericInvoke("helloCallbackException",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject });
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject});
         TestCallback.startLatach();
         Assert.assertEquals(((Throwable) TestCallback.result).getMessage(), "Hello~");
 
@@ -195,23 +194,23 @@ public class GenericTest extends ActivelyDestroyTest {
         boolean isSuccess = true;
         try {
             proxy.$genericInvoke("helloTimeout",
-                new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-                new Object[] { people });
+                    new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                    new Object[]{people});
         } catch (Exception e) {
             isSuccess = false;
         }
         Assert.assertFalse(isSuccess);
 
         // 3. 指定超时,结果序列化为People 类
-        People peopleResult = proxy.$genericInvoke("hello",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject }, People.class, genericContext);
+        People peopleResult = proxy.$genericInvoke("helloTimeout",
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject}, People.class, genericContext);
         assertEquals(peopleResult, people);
 
         // 4. 指定超时,结果序列化为GenericObject
-        GenericObject result = (GenericObject) proxy.$genericInvoke("hello",
-            new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
-            new Object[] { genericObject }, genericContext);
+        GenericObject result = (GenericObject) proxy.$genericInvoke("helloTimeout",
+                new String[]{"com.alipay.sofa.rpc.test.generic.bean.People"},
+                new Object[]{genericObject}, genericContext);
         isCorrect(result);
 
     }
@@ -219,28 +218,28 @@ public class GenericTest extends ActivelyDestroyTest {
     private void testComplexBean(GenericService proxy) {
         ComplexBean complexBean = createJdkComplexBean();
         Object obj = proxy.$genericInvoke("helloComplexBean",
-            new String[] { ComplexBean.class.getName() }, new Object[] { complexBean });
+                new String[]{ComplexBean.class.getName()}, new Object[]{complexBean});
         assertJdkGenericResult(obj);
         obj = GenericUtils.convertToObject(obj);
         assertJdkResult(obj);
 
         obj = proxy.$genericInvoke("helloComplexBean",
-            new String[] { ComplexBean.class.getName() }, new Object[] { complexBean },
-            ComplexBean.class);
+                new String[]{ComplexBean.class.getName()}, new Object[]{complexBean},
+                ComplexBean.class);
         assertJdkResult(obj);
         obj = GenericUtils.convertToGenericObject(obj);
         assertJdkGenericResult(obj);
 
         complexBean = createMyComplexBean();
         obj = proxy.$genericInvoke("helloComplexBean",
-            new String[] { ComplexBean.class.getName() }, new Object[] { complexBean });
+                new String[]{ComplexBean.class.getName()}, new Object[]{complexBean});
         assertMyGenericResult(obj);
         obj = GenericUtils.convertToObject(obj);
         assertMyComplexBeanResult(obj);
 
         obj = proxy.$genericInvoke("helloComplexBean",
-            new String[] { ComplexBean.class.getName() }, new Object[] { complexBean },
-            ComplexBean.class);
+                new String[]{ComplexBean.class.getName()}, new Object[]{complexBean},
+                ComplexBean.class);
         assertMyComplexBeanResult(obj);
         obj = GenericUtils.convertToGenericObject(obj);
         assertMyGenericResult(obj);
@@ -248,15 +247,15 @@ public class GenericTest extends ActivelyDestroyTest {
 
     private void testBasicBean(GenericService proxy) {
         BasicBean basicBean = new BasicBean((short) 12, new Short((short) 32), 21, new Integer(43),
-            (byte) 12, new Byte((byte) 13), 1274646l, 873763l, (float) 1456.9877,
-            (float) 1456.9877, 82837.93883, 82837.88, true, false);
+                (byte) 12, new Byte((byte) 13), 1274646l, 873763l, (float) 1456.9877,
+                (float) 1456.9877, 82837.93883, 82837.88, true, false);
         Object obj = proxy.$genericInvoke("helloBasicBean",
-            new String[] { BasicBean.class.getName() }, new Object[] { basicBean });
+                new String[]{BasicBean.class.getName()}, new Object[]{basicBean});
         obj = GenericUtils.convertToObject(obj);
         assertEquals(obj, basicBean);
 
-        obj = proxy.$genericInvoke("helloBasicBean", new String[] { BasicBean.class.getName() },
-            new Object[] { basicBean }, BasicBean.class);
+        obj = proxy.$genericInvoke("helloBasicBean", new String[]{BasicBean.class.getName()},
+                new Object[]{basicBean}, BasicBean.class);
         assertEquals(obj, basicBean);
         obj = GenericUtils.convertToGenericObject(obj);
         assertGenericBasicBean(obj);
@@ -267,8 +266,8 @@ public class GenericTest extends ActivelyDestroyTest {
         GenericObject genericObject = (GenericObject) go;
         assertEquals(BasicBean.class.getName(), genericObject.getType());
         BasicBean bb = new BasicBean((short) 12, new Short((short) 32), 21, new Integer(43),
-            (byte) 12, new Byte((byte) 13), 1274646l, 873763l, (float) 1456.9877,
-            (float) 1456.9877, 82837.93883, 82837.88, true, false);
+                (byte) 12, new Byte((byte) 13), 1274646l, 873763l, (float) 1456.9877,
+                (float) 1456.9877, 82837.93883, 82837.88, true, false);
         assertEquals(bb.getB(), genericObject.getField("b"));
         assertEquals(bb.getBb(), genericObject.getField("bb"));
         assertEquals(bb.getS(), genericObject.getField("s"));
@@ -292,9 +291,9 @@ public class GenericTest extends ActivelyDestroyTest {
 
         ComplexBean complexBean = new ComplexBean();
 
-        complexBean.setStrs(new String[] { "123", "321", null });
+        complexBean.setStrs(new String[]{"123", "321", null});
         complexBean.setClazz(ArrayList.class);
-        complexBean.setJobs(new Job[] { null, new Job("coder"), null });
+        complexBean.setJobs(new Job[]{null, new Job("coder"), null});
         ArrayList list = new ArrayList();
         list.add(null);
         list.add(1);
@@ -311,9 +310,9 @@ public class GenericTest extends ActivelyDestroyTest {
 
         ComplexBean complexBean = new ComplexBean();
 
-        complexBean.setStrs(new String[] { null, "123", null });
+        complexBean.setStrs(new String[]{null, "123", null});
         complexBean.setClazz(MyList.class);
-        complexBean.setJobs(new Job[] { null, new Job("coder"), null });
+        complexBean.setJobs(new Job[]{null, new Job("coder"), null});
         ArrayList list = new MyList();
         list.add(null);
         list.add(1);
@@ -365,12 +364,12 @@ public class GenericTest extends ActivelyDestroyTest {
         assertArrayEquals(GenericUtils.convertToObject(gb.getField("jobs")), complexBean.getJobs());
         Assert.assertEquals(gb.getField("list").getClass(), GenericCollection.class);
         Assert.assertEquals(GenericUtils.convertToObject(gb.getField("list")).getClass(),
-            MyList.class);
+                MyList.class);
         assertEquals(GenericUtils.convertToObject(gb.getField("list")),
-            complexBean.getList());
+                complexBean.getList());
         Assert.assertEquals(gb.getField("map").getClass(), GenericMap.class);
         Assert.assertEquals(GenericUtils.convertToObject(gb.getField("map")).getClass(),
-            MyMap.class);
+                MyMap.class);
         assertEquals(GenericUtils.convertToObject(gb.getField("map")), complexBean.getMap());
     }
 

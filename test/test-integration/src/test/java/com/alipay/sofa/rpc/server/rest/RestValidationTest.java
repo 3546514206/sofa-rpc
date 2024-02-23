@@ -26,7 +26,6 @@ import org.junit.Test;
 import java.io.IOException;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 public class RestValidationTest extends BaseRestTest {

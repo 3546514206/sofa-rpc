@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.Version;
+import com.alipay.sofa.rpc.common.cache.RpcCacheManager;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -39,6 +40,7 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -49,42 +51,64 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class RpcRuntimeContext {
 
     /**
-     * slf4j Logger for this class
-     */
-    private final static Logger                               LOGGER                    = LoggerFactory
-                                                                                            .getLogger(RpcRuntimeContext.class);
-
-    /**
-     * 上下文信息，例如instancekey，本机ip等信息
-     */
-    private final static ConcurrentHashMap                    CONTEXT                   = new ConcurrentHashMap();
-
-    /**
      * 当前进程Id
      */
-    public static final String                                PID                       = ManagementFactory
-                                                                                            .getRuntimeMXBean()
-                                                                                            .getName().split("@")[0];
-
+    public static final String PID = ManagementFactory
+            .getRuntimeMXBean()
+            .getName().split("@")[0];
     /**
      * 当前应用启动时间（用这个类加载时间为准）
      */
-    public static final long                                  START_TIME                = now();
-
+    public static final long START_TIME = now();
+    /**
+     * 当前所在文件夹地址
+     */
+    public static final String KEY_APPAPTH = "appPath";
+    /**
+     * 应用Id
+     */
+    public static final String APP_ID = "sofa.app.id";
+    /**
+     * 应用名称
+     */
+    public static final String APP_NAME = "sofa.app.name";
+    /**
+     * 应用实例Id
+     */
+    public static final String INSTANCE_ID = "sofa.instance.id";
+    /**
+     * 自动部署的appId
+     */
+    public static final String KEY_APPID = "appId";
+    /**
+     * 自动部署的appName
+     */
+    public static final String KEY_APPNAME = "appName";
+    /**
+     * 自动部署的appInsId
+     */
+    public static final String KEY_APPINSID = "appInsId";
+    /**
+     * slf4j Logger for this class
+     */
+    private final static Logger LOGGER = LoggerFactory
+            .getLogger(RpcRuntimeContext.class);
+    /**
+     * 上下文信息，例如instancekey，本机ip等信息
+     */
+    private final static ConcurrentMap CONTEXT = new ConcurrentHashMap();
     /**
      * 发布的服务配置
      */
     private final static ConcurrentHashSet<ProviderBootstrap> EXPORTED_PROVIDER_CONFIGS = new ConcurrentHashSet<ProviderBootstrap>();
-
     /**
      * 发布的订阅配置
      */
     private final static ConcurrentHashSet<ConsumerBootstrap> REFERRED_CONSUMER_CONFIGS = new ConcurrentHashSet<ConsumerBootstrap>();
-
     /**
      * 关闭资源的钩子
      */
-    private final static List<Destroyable.DestroyHook>        DESTROY_HOOKS             = new CopyOnWriteArrayList<Destroyable.DestroyHook>();
+    private final static List<Destroyable.DestroyHook> DESTROY_HOOKS = new CopyOnWriteArrayList<Destroyable.DestroyHook>();
 
     static {
         if (LOGGER.isInfoEnabled()) {
@@ -173,10 +197,12 @@ public class RpcRuntimeContext {
         for (Destroyable.DestroyHook destroyHook : DESTROY_HOOKS) {
             destroyHook.postDestroy();
         }
+        // 清理缓存
+        RpcCacheManager.clearAll();
         RpcRunningState.setShuttingDown(false);
         if (LOGGER.isWarnEnabled()) {
             LOGGER.warn("SOFA RPC Framework has been release all resources {}...",
-                active ? "actively " : "");
+                    active ? "actively " : "");
         }
     }
 
@@ -292,42 +318,9 @@ public class RpcRuntimeContext {
      *
      * @return the CONTEXT
      */
-    public static ConcurrentHashMap getContext() {
+    public static ConcurrentMap getContext() {
         return new ConcurrentHashMap(CONTEXT);
     }
-
-    /**
-     * 当前所在文件夹地址
-     */
-    public static final String KEY_APPAPTH  = "appPath";
-
-    /**
-     * 应用Id
-     */
-    public static final String APP_ID       = "sofa.app.id";
-    /**
-     * 应用名称
-     */
-    public static final String APP_NAME     = "sofa.app.name";
-    /**
-     * 应用实例Id
-     */
-    public static final String INSTANCE_ID  = "sofa.instance.id";
-
-    /**
-     * 自动部署的appId
-     */
-    public static final String KEY_APPID    = "appId";
-
-    /**
-     * 自动部署的appName
-     */
-    public static final String KEY_APPNAME  = "appName";
-
-    /**
-     * 自动部署的appInsId
-     */
-    public static final String KEY_APPINSID = "appInsId";
 
     /**
      * 按应用名卸载RPC相关服务<br>

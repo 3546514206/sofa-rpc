@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+
 import javax.annotation.Priority;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -23,35 +26,35 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 @Provider
 @Priority(150)
 public class ClientRequestTestFilter implements ClientRequestFilter {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ClientRequestTestFilter.class);
 
-    private static String name  = "X";
+    private static String name = "X";
 
     @CustomerAnnotation()
-    private static String code  = "x";
+    private static String code = "x";
 
     private static String code2 = "x";
 
+    public static String getName() {
+        return name + code + code2;
+    }
+
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        System.out.println("客户端request filter生效");
+        LOGGER.info("客户端request filter生效");
         name = "A";
-        System.out.println("客户端customerAnnotion  code:" + code);
+        LOGGER.info("客户端customerAnnotation  code:" + code);
     }
 
     @CustomerAnnotation()
     public void setCode(String code2) {
         this.code2 = code2;
-        System.out.println("客户端customerAnnotion  code2:" + this.code2);
+        LOGGER.info("客户端customerAnnotation  code2:" + this.code2);
 
-    }
-
-    public static String getName() {
-        return name + code + code2;
     }
 }

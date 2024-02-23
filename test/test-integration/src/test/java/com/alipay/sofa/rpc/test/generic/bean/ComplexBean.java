@@ -27,10 +27,10 @@ import java.util.Map;
 public class ComplexBean {
 
     private String[] strs;
-    private Job[]    jobs;
-    private List     list;
-    private Map      map;
-    private Class    clazz;
+    private Job[] jobs;
+    private List list;
+    private Map map;
+    private Class clazz;
 
     public String[] getStrs() {
         return strs;

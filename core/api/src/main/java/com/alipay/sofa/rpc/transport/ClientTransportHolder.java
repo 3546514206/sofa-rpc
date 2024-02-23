@@ -36,7 +36,7 @@ public interface ClientTransportHolder extends Destroyable {
     /**
      * 销毁长连接
      *
-     * @param clientTransport   ClientTransport
+     * @param clientTransport ClientTransport
      * @return need close client transport
      */
     boolean removeClientTransport(ClientTransport clientTransport);

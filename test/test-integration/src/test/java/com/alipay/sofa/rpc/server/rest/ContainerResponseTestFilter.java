@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -23,23 +26,23 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 @Provider
 public class ContainerResponseTestFilter implements ContainerResponseFilter {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ContainerResponseTestFilter.class);
 
     private static String name = "X";
 
-    @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
-        throws IOException {
-        System.out.println("服务端response filter生效");
-        name = "C";
-
-    }
-
     public static String getName() {
         return name;
+    }
+
+    @Override
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
+            throws IOException {
+        LOGGER.info("服务端response filter生效");
+        name = "C";
+
     }
 }

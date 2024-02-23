@@ -25,8 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ListDifferenceTest {

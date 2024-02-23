@@ -20,7 +20,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 public class JAXRSProviderManagerTest {

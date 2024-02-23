@@ -16,15 +16,12 @@
  */
 package com.alipay.sofa.rpc.common.struct;
 
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * ScheduledService can restart.
@@ -34,64 +31,67 @@ import java.util.concurrent.TimeUnit;
 public class ScheduledService {
 
     /**
-     * slf4j Logger for this class
-     */
-    private final static Logger               LOGGER          = LoggerFactory.getLogger(ScheduledService.class);
-
-    /**
      * 固定频率执行，按执行开始时间计算间隔
      */
-    public static final int                   MODE_FIXEDRATE  = 0;
+    public static final int MODE_FIXEDRATE = 0;
     /**
      * 固定间隔执行，执行完成后才计算间隔
      */
-    public static final int                   MODE_FIXEDDELAY = 1;
-
+    public static final int MODE_FIXEDDELAY = 1;
     /**
-     * The Scheduled executor service.
+     * 缓存了目前全部的定时任务， 用于重建
      */
-    private volatile ScheduledExecutorService scheduledExecutorService;
-
+    protected final static Map<ScheduledService, Long> SCHEDULED_SERVICE_MAP = new ConcurrentHashMap<ScheduledService,
+            Long>();
     /**
-     * The Thread name
+     * slf4j Logger for this class
      */
-    private String                            threadName;
-
+    private final static Logger LOGGER = LoggerFactory.getLogger(ScheduledService.class);
+    /**
+     * 正在重置标识
+     */
+    protected static volatile boolean resetting;
     /**
      * The Runnable.
      */
-    private final Runnable                    runnable;
+    private final Runnable runnable;
 
     /**
      * The Initial delay.
      */
-    private final long                        initialDelay;
+    private final long initialDelay;
 
     /**
      * The Period.
      */
-    private final long                        period;
+    private final long period;
 
     /**
      * The Unit.
      */
-    private final TimeUnit                    unit;
+    private final TimeUnit unit;
 
     /**
      * 0:scheduleAtFixedRate
      * 1:scheduleWithFixedDelay
      */
-    private final int                         mode;
-
+    private final int mode;
+    /**
+     * The Scheduled executor service.
+     */
+    private volatile ScheduledExecutorService scheduledExecutorService;
+    /**
+     * The Thread name
+     */
+    private String threadName;
     /**
      * The Future.
      */
-    private volatile ScheduledFuture          future;
-
+    private volatile ScheduledFuture future;
     /**
      * The Started.
      */
-    private volatile boolean                  started;
+    private volatile boolean started;
 
     /**
      * Instantiates a new Scheduled service.
@@ -118,6 +118,40 @@ public class ScheduledService {
     }
 
     /**
+     * 重建定时任务，用于特殊情况
+     */
+    public static synchronized void reset() {
+        resetting = true;
+        if (LOGGER.isWarnEnabled()) {
+            LOGGER.warn("Start resetting all {} schedule executor service.", SCHEDULED_SERVICE_MAP.size());
+        }
+        for (Map.Entry<ScheduledService, Long> entry : SCHEDULED_SERVICE_MAP.entrySet()) {
+            try {
+                ScheduledService service = entry.getKey();
+                if (service.isStarted()) {
+                    service.stop();
+                    service.start();
+                }
+            } catch (Exception e) {
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_RESTART_SCHEDULE_SERVICE), e);
+            }
+        }
+        if (LOGGER.isWarnEnabled()) {
+            LOGGER.warn("Already reset all {} schedule executor service.", SCHEDULED_SERVICE_MAP.size());
+        }
+        resetting = false;
+    }
+
+    /**
+     * 是否正在重置
+     *
+     * @return the boolean
+     */
+    public static boolean isResetting() {
+        return resetting;
+    }
+
+    /**
      * 开始执行定时任务
      *
      * @return the boolean
@@ -130,18 +164,18 @@ public class ScheduledService {
         }
         if (scheduledExecutorService == null) {
             scheduledExecutorService = new ScheduledThreadPoolExecutor(1,
-                new NamedThreadFactory(threadName, true));
+                    new NamedThreadFactory(threadName, true));
         }
         ScheduledFuture future = null;
         switch (mode) {
             case MODE_FIXEDRATE:
                 future = scheduledExecutorService.scheduleAtFixedRate(runnable, initialDelay,
-                    period,
-                    unit);
+                        period,
+                        unit);
                 break;
             case MODE_FIXEDDELAY:
                 future = scheduledExecutorService.scheduleWithFixedDelay(runnable, initialDelay, period,
-                    unit);
+                        unit);
                 break;
             default:
                 break;
@@ -195,50 +229,5 @@ public class ScheduledService {
      */
     public boolean isStarted() {
         return started;
-    }
-
-    /**
-     * 缓存了目前全部的定时任务， 用于重建
-     */
-    protected final static Map<ScheduledService, Long> SCHEDULED_SERVICE_MAP = new ConcurrentHashMap<ScheduledService,
-                                                                                     Long>();
-
-    /**
-     * 重建定时任务，用于特殊情况
-     */
-    public static synchronized void reset() {
-        resetting = true;
-        if (LOGGER.isWarnEnabled()) {
-            LOGGER.warn("Start resetting all {} schedule executor service.", SCHEDULED_SERVICE_MAP.size());
-        }
-        for (Map.Entry<ScheduledService, Long> entry : SCHEDULED_SERVICE_MAP.entrySet()) {
-            try {
-                ScheduledService service = entry.getKey();
-                if (service.isStarted()) {
-                    service.stop();
-                    service.start();
-                }
-            } catch (Exception e) {
-                LOGGER.error("Error when restart schedule service", e);
-            }
-        }
-        if (LOGGER.isWarnEnabled()) {
-            LOGGER.warn("Already reset all {} schedule executor service.", SCHEDULED_SERVICE_MAP.size());
-        }
-        resetting = false;
-    }
-
-    /**
-     * 正在重置标识
-     */
-    protected static volatile boolean resetting;
-
-    /**
-     * 是否正在重置
-     *
-     * @return the boolean
-     */
-    public static boolean isResetting() {
-        return resetting;
     }
 }

@@ -30,19 +30,19 @@ public class NotReusableClientTransportHolderTest {
         NotReusableClientTransportHolder holder = new NotReusableClientTransportHolder();
         ClientTransportConfig config = new ClientTransportConfig();
         config.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12222))
-            .setContainer("test");
+                .setContainer("test");
 
         TestClientTransport clientTransport = (TestClientTransport) holder.getClientTransport(config);
 
         ClientTransportConfig config2 = new ClientTransportConfig();
         config2.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12222))
-            .setContainer("test");
+                .setContainer("test");
         TestClientTransport clientTransport2 = (TestClientTransport) holder.getClientTransport(config2);
         Assert.assertFalse(clientTransport == clientTransport2);
 
         ClientTransportConfig config3 = new ClientTransportConfig();
         config3.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12223))
-            .setContainer("test");
+                .setContainer("test");
         TestClientTransport clientTransport3 = (TestClientTransport) holder.getClientTransport(config3);
         Assert.assertFalse(clientTransport2 == clientTransport3);
 

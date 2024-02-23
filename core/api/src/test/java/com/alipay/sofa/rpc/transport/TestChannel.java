@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.transport;
 import java.net.InetSocketAddress;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class TestChannel extends AbstractChannel {

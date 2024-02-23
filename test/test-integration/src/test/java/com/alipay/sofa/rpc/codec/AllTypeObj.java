@@ -17,45 +17,39 @@
 package com.alipay.sofa.rpc.codec;
 
 import java.math.BigDecimal;
-import java.util.Currency;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class AllTypeObj implements IAllType {
 
-    private int        i;
-    private byte       b;
-    private short      s;
-    private long       l;
-    private boolean    z;
-    private char       c;
-    private double     d;
-    private float      f;
+    private int i;
+    private byte b;
+    private short s;
+    private long l;
+    private boolean z;
+    private char c;
+    private double d;
+    private float f;
 
-    private Integer    i1;
-    private Byte       b1;
-    private Short      s1;
-    private Long       L1;
-    private Character  c1;
-    private Double     d1;
-    private float      f1;
+    private Integer i1;
+    private Byte b1;
+    private Short s1;
+    private Long L1;
+    private Character c1;
+    private Double d1;
+    private float f1;
 
-    private String     str;
+    private String str;
 
-    private List       list;
-    private Set        set;
-    private Map        map;
+    private List list;
+    private Set set;
+    private Map map;
 
     private BigDecimal bigDecimal;
-    private Date       date;
-    private Currency   currency;
+    private Date date;
+    private Currency currency;
 
     @Override
     public boolean equals(Object o) {

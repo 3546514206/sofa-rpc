@@ -36,8 +36,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RpcContextTest extends ActivelyDestroyTest {
@@ -46,27 +44,27 @@ public class RpcContextTest extends ActivelyDestroyTest {
     public void testAll() {
         // 只有1个线程 执行
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(22222)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-            .setQueues(100).setCoreThreads(1).setMaxThreads(2);
+                .setPort(22222)
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+                .setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
         // 发布一个服务，每个请求要执行1秒
         CtxHelloServiceImpl helloServiceImpl = new CtxHelloServiceImpl();
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setRef(helloServiceImpl)
-            .setServer(serverConfig)
-            .setRegister(false);
+                .setInterfaceId(HelloService.class.getName())
+                .setApplication(new ApplicationConfig().setAppName("test-server"))
+                .setRef(helloServiceImpl)
+                .setServer(serverConfig)
+                .setRegister(false);
         providerConfig.export();
 
         {
             ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setApplication(new ApplicationConfig().setAppName("test-client"))
-                .setDirectUrl("bolt://127.0.0.1:22222?appName=test-server")
-                .setTimeout(30000)
-                .setRegister(false);
+                    .setInterfaceId(HelloService.class.getName())
+                    .setApplication(new ApplicationConfig().setAppName("test-client"))
+                    .setDirectUrl("bolt://127.0.0.1:22222?appName=test-server")
+                    .setTimeout(30000)
+                    .setRegister(false);
             final HelloService helloService = consumerConfig.refer();
 
             String str = helloService.sayHello("xxx", 123);
@@ -80,37 +78,37 @@ public class RpcContextTest extends ActivelyDestroyTest {
 
             Assert.assertEquals(serviceContext.getCallerAppName(), "test-client");
             Assert.assertEquals(referenceContext.getTargetAppName(), "test-server");
-            Assert.assertNotNull(referenceContext.getClinetIP());
+            Assert.assertNotNull(referenceContext.getClientIP());
             Assert.assertTrue(referenceContext.getClientPort() > 0);
         }
         {
             final CountDownLatch latch = new CountDownLatch(1);
-            final String[] ret = { null };
+            final String[] ret = {null};
             ConsumerConfig<HelloService> consumerConfig2 = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setApplication(new ApplicationConfig().setAppName("test-client"))
-                .setDirectUrl("bolt://127.0.0.1:22222?appName=test-server")
-                .setTimeout(2000)
-                .setInvokeType("callback")
-                .setOnReturn(new SofaResponseCallback() {
-                    @Override
-                    public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                        ret[0] = (String) appResponse;
-                        latch.countDown();
-                    }
+                    .setInterfaceId(HelloService.class.getName())
+                    .setApplication(new ApplicationConfig().setAppName("test-client"))
+                    .setDirectUrl("bolt://127.0.0.1:22222?appName=test-server")
+                    .setTimeout(2000)
+                    .setInvokeType("callback")
+                    .setOnReturn(new SofaResponseCallback() {
+                        @Override
+                        public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                            ret[0] = (String) appResponse;
+                            latch.countDown();
+                        }
 
-                    @Override
-                    public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                        latch.countDown();
-                    }
+                        @Override
+                        public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                            latch.countDown();
+                        }
 
-                    @Override
-                    public void onSofaException(SofaRpcException sofaException, String methodName,
-                                                RequestBase request) {
-                        latch.countDown();
-                    }
-                })
-                .setRegister(false);
+                        @Override
+                        public void onSofaException(SofaRpcException sofaException, String methodName,
+                                                    RequestBase request) {
+                            latch.countDown();
+                        }
+                    })
+                    .setRegister(false);
             final HelloService helloServiceCallback = consumerConfig2.refer();
 
             String ret0 = helloServiceCallback.sayHello("xxx", 22);
@@ -125,7 +123,7 @@ public class RpcContextTest extends ActivelyDestroyTest {
 
             Assert.assertEquals(serviceContext.getCallerAppName(), "test-client");
             Assert.assertEquals(referenceContext.getTargetAppName(), "test-server");
-            Assert.assertNotNull(referenceContext.getClinetIP());
+            Assert.assertNotNull(referenceContext.getClientIP());
             Assert.assertTrue(referenceContext.getClientPort() > 0);
 
             try {

@@ -28,7 +28,6 @@ import java.lang.reflect.Type;
 import static org.jboss.resteasy.util.FindAnnotation.findAnnotation;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 @Provider
@@ -44,6 +43,6 @@ public class CustomerInjectorFactory extends InjectorFactoryImpl {
         }
 
         return super.createParameterExtractor(injectTargetClass, injectTarget, type, genericType, annotations,
-            useDefault, providerFactory);
+                useDefault, providerFactory);
     }
 }

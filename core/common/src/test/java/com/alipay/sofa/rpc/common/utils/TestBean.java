@@ -19,18 +19,16 @@ package com.alipay.sofa.rpc.common.utils;
 import java.util.List;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class TestBean {
 
-    private String           alias;
-    private int              heartbeat;
-    private boolean          register;
-    List<TestSubBean>        subBeans;
+    private static String s2;
+    List<TestSubBean> subBeans;
+    private String alias;
+    private int heartbeat;
+    private boolean register;
     private transient String t1;
-    private static String    s2;
 
     public String getAlias() {
         return alias;

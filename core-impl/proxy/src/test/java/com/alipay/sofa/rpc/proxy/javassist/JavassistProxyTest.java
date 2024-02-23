@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.proxy.javassist;
 
+import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.proxy.AbstractTestClass;
 import com.alipay.sofa.rpc.proxy.TestInterface;
 import com.alipay.sofa.rpc.proxy.TestInvoker;
@@ -23,13 +26,15 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class JavassistProxyTest {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(JavassistProxyTest.class);
+
     @Test
     public void getProxy() throws Exception {
         JavassistProxy proxy = new JavassistProxy();
@@ -37,7 +42,7 @@ public class JavassistProxyTest {
         try {
             testClass = proxy.getProxy(AbstractTestClass.class, new TestInvoker());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            LOGGER.info(e.getMessage());
         }
         Assert.assertNull(testClass);
 
@@ -60,6 +65,42 @@ public class JavassistProxyTest {
         Assert.assertFalse(testInterface.equals(invoker));
         Assert.assertFalse(testInterface.equals(another2));
         Assert.assertEquals(testInterface, another1);
+
+        Assert.assertEquals(678, another1.sayNum(true));
+        SofaRequest request = invoker.getRequest();
+        Assert.assertEquals(TestInterface.class.getCanonicalName(), request.getInterfaceName());
+        Assert.assertEquals("sayNum", request.getMethodName());
+        Assert.assertEquals("boolean", request.getMethodArgSigs()[0]);
+        Assert.assertEquals(true, request.getMethodArgs()[0]);
+        Assert.assertNotNull(request.getMethod());
+
+        Assert.assertEquals("sayHello", another1.sayHello("xxxx"));
+        another1.sayNoting();
+        Assert.assertArrayEquals(new int[]{6, 7, 8}, another1.sayNums(null, new HashMap()));
+        Assert.assertNull(another1.sayNum2(1.2D));
+
+        boolean error = false;
+        try {
+            another1.throwbiz1();
+        } catch (Throwable e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+
+        error = false;
+        try {
+            another1.throwbiz2();
+        } catch (Throwable e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+
+        try {
+            another1.throwRPC();
+        } catch (Throwable e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
     }
 
 }

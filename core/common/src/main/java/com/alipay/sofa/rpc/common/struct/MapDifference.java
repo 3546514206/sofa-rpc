@@ -31,15 +31,15 @@ public class MapDifference<K, V> {
     /**
      * The Only on left.
      */
-    private Map<K, V>                  onlyOnLeft;
+    private Map<K, V> onlyOnLeft;
     /**
      * The Only on right.
      */
-    private Map<K, V>                  onlyOnRight;
+    private Map<K, V> onlyOnRight;
     /**
      * The On both.
      */
-    private Map<K, V>                  onBoth;
+    private Map<K, V> onBoth;
     /**
      * The Differences.
      */
@@ -48,10 +48,8 @@ public class MapDifference<K, V> {
     /**
      * Instantiates a new Map difference.
      *
-     * @param left
-     *         the left
-     * @param right
-     *         the right
+     * @param left  the left
+     * @param right the right
      */
     public MapDifference(Map<? extends K, ? extends V> left, Map<? extends K, ? extends V> right) {
         boolean switched = false;
@@ -76,8 +74,8 @@ public class MapDifference<K, V> {
                     onBoth.put(leftKey, leftValue);
                 } else {
                     differences.put(leftKey,
-                        switched ? new ValueDifference<V>(rightValue, leftValue) :
-                            new ValueDifference<V>(leftValue, rightValue));
+                            switched ? new ValueDifference<V>(rightValue, leftValue) :
+                                    new ValueDifference<V>(leftValue, rightValue));
                 }
             } else {
                 onlyOnLeft.put(leftKey, leftValue);
@@ -92,10 +90,8 @@ public class MapDifference<K, V> {
     /**
      * Value equals.
      *
-     * @param leftValue
-     *         the left value
-     * @param rightValue
-     *         the right value
+     * @param leftValue  the left value
+     * @param rightValue the right value
      * @return the boolean
      */
     private boolean valueEquals(V leftValue, V rightValue) {

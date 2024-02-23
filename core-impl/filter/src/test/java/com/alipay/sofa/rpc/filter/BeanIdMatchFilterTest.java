@@ -16,29 +16,34 @@
  */
 package com.alipay.sofa.rpc.filter;
 
+import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 public class BeanIdMatchFilterTest {
     @Test
     public void testBeanIdMatch() {
         TestCustomizeFilter testCustomizeFilter = new TestCustomizeFilter();
+        testCustomizeFilter.setIdRule("AAA,!BBB");
+        Assert.assertEquals("AAA,!BBB", testCustomizeFilter.getIdRule());
 
         AbstractInterfaceConfig configA = new ProviderConfig();
+        configA.setInterfaceId(Serializer.class.getName());
         configA.setId("AAA");
         FilterInvoker filterInvokerA = new FilterInvoker(null, null, configA);
 
         AbstractInterfaceConfig configB = new ProviderConfig();
+        configB.setInterfaceId(Serializer.class.getName());
         configB.setId("BBB");
         FilterInvoker filterInvokerB = new FilterInvoker(null, null, configB);
 
         AbstractInterfaceConfig configC = new ProviderConfig();
+        configC.setInterfaceId(Serializer.class.getName());
         configC.setId("CCC");
         FilterInvoker filterInvokerC = new FilterInvoker(null, null, configC);
 
@@ -46,6 +51,21 @@ public class BeanIdMatchFilterTest {
         Assert.assertEquals(false, testCustomizeFilter.needToLoad(filterInvokerB));
         Assert.assertEquals(true, testCustomizeFilter.needToLoad(filterInvokerC));
 
+    }
+
+    @Test
+    public void testIsMatch() {
+        TestCustomizeFilter testCustomizeFilter = new TestCustomizeFilter();
+        Assert.assertTrue(testCustomizeFilter.isMatch(""));
+
+        testCustomizeFilter = new TestCustomizeFilter();
+        testCustomizeFilter.setIdRule("AAA,BBB");
+
+        AbstractInterfaceConfig configA = new ProviderConfig();
+        configA.setInterfaceId(Serializer.class.getName());
+        configA.setId("AAA");
+        FilterInvoker filterInvokerA = new FilterInvoker(null, null, configA);
+        Assert.assertEquals(true, testCustomizeFilter.needToLoad(filterInvokerA));
     }
 
 }

@@ -25,8 +25,6 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ServerB {
@@ -35,25 +33,25 @@ public class ServerB {
 
         // B服务里的C服务客户端
         ConsumerConfig<ServiceC> consumerConfig = new ConsumerConfig<ServiceC>()
-            .setApplication(new ApplicationConfig().setAppName("BBB"))
-            .setInterfaceId(ServiceC.class.getName())
-            .setDirectUrl("bolt://127.0.0.1:12299?appName=CCC")
-            .setRegister(false)
-            .setInvokeType("callback") // 不设置，调用级别可设置
-            .setTimeout(2000);
+                .setApplication(new ApplicationConfig().setAppName("BBB"))
+                .setInterfaceId(ServiceC.class.getName())
+                .setDirectUrl("bolt://127.0.0.1:12299?appName=CCC")
+                .setRegister(false)
+                .setInvokeType("callback") // 不设置，调用级别可设置
+                .setTimeout(2000);
 
         ServiceC serviceC = consumerConfig.refer();
 
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(12298)
-            .setDaemon(false);
+                .setPort(12298)
+                .setDaemon(false);
 
         ProviderConfig<ServiceB> providerConfig = new ProviderConfig<ServiceB>()
-            .setInterfaceId(ServiceB.class.getName())
-            .setApplication(new ApplicationConfig().setAppName("BBB"))
-            .setRef(new ServiceBImpl(serviceC))
-            .setServer(serverConfig)
-            .setRegister(false);
+                .setInterfaceId(ServiceB.class.getName())
+                .setApplication(new ApplicationConfig().setAppName("BBB"))
+                .setRef(new ServiceBImpl(serviceC))
+                .setServer(serverConfig)
+                .setRegister(false);
 
         providerConfig.export();
     }

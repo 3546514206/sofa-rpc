@@ -28,10 +28,10 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
  */
 public class ClientSyncReceiveEvent implements Event {
     private final ConsumerConfig consumerConfig;
-    private final ProviderInfo   providerInfo;
-    private final SofaRequest    request;
-    private final SofaResponse   response;
-    private final Throwable      throwable;
+    private final ProviderInfo providerInfo;
+    private final SofaRequest request;
+    private final SofaResponse response;
+    private final Throwable throwable;
 
     public ClientSyncReceiveEvent(ConsumerConfig consumerConfig, ProviderInfo providerInfo,
                                   SofaRequest request, SofaResponse response, Throwable throwable) {

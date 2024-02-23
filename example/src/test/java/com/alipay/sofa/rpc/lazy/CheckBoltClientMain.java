@@ -24,8 +24,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.HelloService;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class CheckBoltClientMain {
@@ -39,13 +37,13 @@ public class CheckBoltClientMain {
         ApplicationConfig application = new ApplicationConfig().setAppName("test-client");
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setApplication(application)
-            .setInterfaceId(HelloService.class.getName())
-            .setDirectUrl("bolt://127.0.0.1:22100")
-            .setRegister(false)
-            .setLazy(true)
-            .setCheck(true)
-            .setTimeout(3000);
+                .setApplication(application)
+                .setInterfaceId(HelloService.class.getName())
+                .setDirectUrl("bolt://127.0.0.1:22100")
+                .setRegister(false)
+                .setLazy(true)
+                .setCheck(true)
+                .setTimeout(3000);
         HelloService helloService = consumerConfig.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);

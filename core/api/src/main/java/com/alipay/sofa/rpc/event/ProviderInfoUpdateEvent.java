@@ -26,8 +26,8 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
  */
 public class ProviderInfoUpdateEvent implements Event {
     private final ConsumerConfig consumerConfig;
-    private final ProviderGroup  oldProviderGroup;
-    private final ProviderGroup  newProviderGroup;
+    private final ProviderGroup oldProviderGroup;
+    private final ProviderGroup newProviderGroup;
 
     public ProviderInfoUpdateEvent(ConsumerConfig consumerConfig, ProviderGroup oldProviderGroup,
                                    ProviderGroup newProviderGroup) {

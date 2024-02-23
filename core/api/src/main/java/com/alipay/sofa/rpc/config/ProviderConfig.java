@@ -18,32 +18,23 @@ package com.alipay.sofa.rpc.config;
 
 import com.alipay.sofa.rpc.bootstrap.Bootstraps;
 import com.alipay.sofa.rpc.bootstrap.ProviderBootstrap;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
-import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
-import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROVIDER_BOOTSTRAP;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_CONCURRENTS;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_DELAY;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_DYNAMIC;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_EXCLUDE;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_INCLUDE;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_INVOKE_TIMEOUT;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_PRIORITY;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_REPEATED_EXPORT_LIMIT;
-import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_WEIGHT;
+import static com.alipay.sofa.rpc.common.RpcConfigs.*;
+import static com.alipay.sofa.rpc.common.RpcOptions.*;
 
 /**
  * 服务提供者配置
@@ -56,59 +47,59 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * The constant serialVersionUID.
      */
-    private static final long                                       serialVersionUID    = -3058073881775315962L;
+    private static final long serialVersionUID = -3058073881775315962L;
 
     /*---------- 参数配置项开始 ------------*/
 
     /**
      * 接口实现类引用
      */
-    protected transient T                                           ref;
+    protected transient T ref;
 
     /**
      * 配置的协议列表
      */
-    protected List<ServerConfig>                                    server;
+    protected List<ServerConfig> server;
 
     /**
      * 服务发布延迟,单位毫秒，默认0，配置为-1代表spring加载完毕（通过spring才生效）
      */
-    protected int                                                   delay               = getIntValue(PROVIDER_DELAY);
+    protected int delay = getIntValue(PROVIDER_DELAY);
 
     /**
      * 权重
      */
-    protected int                                                   weight              = getIntValue(PROVIDER_WEIGHT);
+    protected int weight = getIntValue(PROVIDER_WEIGHT);
 
     /**
      * 包含的方法
      */
-    protected String                                                include             = getStringValue(PROVIDER_INCLUDE);
+    protected String include = getStringValue(PROVIDER_INCLUDE);
 
     /**
      * 不发布的方法列表，逗号分隔
      */
-    protected String                                                exclude             = getStringValue(PROVIDER_EXCLUDE);
+    protected String exclude = getStringValue(PROVIDER_EXCLUDE);
 
     /**
      * 是否动态注册，默认为true，配置为false代表不主动发布，需要到管理端进行上线操作
      */
-    protected boolean                                               dynamic             = getBooleanValue(PROVIDER_DYNAMIC);
+    protected boolean dynamic = getBooleanValue(PROVIDER_DYNAMIC);
 
     /**
      * 服务优先级，越大越高
      */
-    protected int                                                   priority            = getIntValue(PROVIDER_PRIORITY);
+    protected int priority = getIntValue(PROVIDER_PRIORITY);
 
     /**
      * 启动器
      */
-    protected String                                                bootstrap           = getStringValue(DEFAULT_PROVIDER_BOOTSTRAP);
+    protected String bootstrap;
 
     /**
      * 自定义线程池
      */
-    protected transient ThreadPoolExecutor                          executor;
+    protected transient ThreadPoolExecutor executor;
 
     /**
      * whitelist blacklist
@@ -119,31 +110,31 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * 服务端执行超时时间(毫秒)，不会打断执行线程，只是打印警告
      */
-    protected int                                                   timeout             = getIntValue(PROVIDER_INVOKE_TIMEOUT);
+    protected int timeout = getIntValue(PROVIDER_INVOKE_TIMEOUT);
 
     /**
      * 接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
      */
-    protected int                                                   concurrents         = getIntValue(PROVIDER_CONCURRENTS);
+    protected int concurrents = getIntValue(PROVIDER_CONCURRENTS);
 
     /**
      * 同一个服务（接口协议uniqueId相同）的最大发布次数，防止由于代码bug导致重复发布。注意：后面的发布可能会覆盖前面的实现，-1表示不检查
      *
      * @since 5.2.0
      */
-    protected int                                                   repeatedExportLimit = getIntValue(PROVIDER_REPEATED_EXPORT_LIMIT);
+    protected int repeatedExportLimit = getIntValue(PROVIDER_REPEATED_EXPORT_LIMIT);
 
     /*---------- 参数配置项结束 ------------*/
 
     /**
      * 方法名称：是否可调用
      */
-    protected transient volatile ConcurrentHashMap<String, Boolean> methodsLimit;
+    protected transient volatile ConcurrentMap<String, Boolean> methodsLimit;
 
     /**
      * 服务提供者启动类
      */
-    protected transient ProviderBootstrap                           providerBootstrap;
+    protected transient ProviderBootstrap providerBootstrap;
 
     /**
      * Gets proxy class.
@@ -159,17 +150,23 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
                 if (!proxyClass.isInterface()) {
-                    throw ExceptionUtils.buildRuntime("service.interfaceId",
-                        interfaceId, "interfaceId must set interface class, not implement class");
+                    if ((getServer() != null) && getServer().size() != 0) {
+                        for (int i = 0; i < getServer().size(); i++) {
+                            if (!RpcConstants.PROTOCOL_TYPE_TRIPLE.equals(getServer().get(i).getProtocol())) {
+                                throw ExceptionUtils.buildRuntime("service.interfaceId",
+                                        interfaceId, "interfaceId must set interface class, not implement class");
+                            }
+                        }
+                    }
                 }
             } else {
                 throw ExceptionUtils.buildRuntime("service.interfaceId",
-                    "null", "interfaceId must be not null");
+                        "null", "interfaceId must be not null");
             }
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_GET_PROXY_CLASS), e);
         }
         return proxyClass;
     }
@@ -221,6 +218,20 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      */
     public ProviderConfig<T> setServer(List<ServerConfig> server) {
         this.server = server;
+        return this;
+    }
+
+    /**
+     * add server.
+     *
+     * @param server ServerConfig
+     * @return the ProviderConfig
+     */
+    public ProviderConfig<T> setServer(ServerConfig server) {
+        if (this.server == null) {
+            this.server = new ArrayList<ServerConfig>();
+        }
+        this.server.add(server);
         return this;
     }
 
@@ -473,26 +484,12 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
         if (CommonUtils.isNotEmpty(methods)) {
             for (MethodConfig methodConfig : methods.values()) {
                 if (methodConfig.getConcurrents() != null
-                    && methodConfig.getConcurrents() > 0) {
+                        && methodConfig.getConcurrents() > 0) {
                     return true;
                 }
             }
         }
         return false;
-    }
-
-    /**
-     * add server.
-     *
-     * @param server ServerConfig
-     * @return the ProviderConfig
-     */
-    public ProviderConfig<T> setServer(ServerConfig server) {
-        if (this.server == null) {
-            this.server = new ArrayList<ServerConfig>();
-        }
-        this.server.add(server);
-        return this;
     }
 
     /**
@@ -510,7 +507,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      * @param methodsLimit the methodsLimit
      * @return the ProviderConfig
      */
-    public ProviderConfig<T> setMethodsLimit(ConcurrentHashMap<String, Boolean> methodsLimit) {
+    public ProviderConfig<T> setMethodsLimit(ConcurrentMap<String, Boolean> methodsLimit) {
         this.methodsLimit = methodsLimit;
         return this;
     }
@@ -541,5 +538,14 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      */
     public ProviderBootstrap getProviderBootstrap() {
         return providerBootstrap;
+    }
+
+    /**
+     * set provider bootstrap
+     *
+     * @param providerBootstrap
+     */
+    public void setProviderBootstrap(ProviderBootstrap providerBootstrap) {
+        this.providerBootstrap = providerBootstrap;
     }
 }

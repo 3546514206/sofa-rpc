@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Codec工具类
  *
@@ -26,12 +29,12 @@ public final class CodecUtils {
     /**
      * 空的Object数组，无参方法
      */
-    public static final Object[]   EMPTY_OBJECT_ARRAY = new Object[0];
+    public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
     /**
      * 空的Class数组，无参方法
      */
-    public static final Class<?>[] EMPTY_CLASS_ARRAY  = new Class<?>[0];
+    public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 
     /**
      * int 转 byte数组
@@ -56,9 +59,9 @@ public final class CodecUtils {
      */
     public static int bytesToInt(byte[] ary) {
         return (ary[3] & 0xFF)
-            | ((ary[2] << 8) & 0xFF00)
-            | ((ary[1] << 16) & 0xFF0000)
-            | ((ary[0] << 24) & 0xFF000000);
+                | ((ary[2] << 8) & 0xFF00)
+                | ((ary[1] << 16) & 0xFF0000)
+                | ((ary[0] << 24) & 0xFF000000);
     }
 
     /**
@@ -94,7 +97,7 @@ public final class CodecUtils {
      * @return byte数组 [&lt;16,&lt;16]
      */
     public static byte[] parseHigh4Low4Bytes(byte b) {
-        return new byte[] {
+        return new byte[]{
                 (byte) ((b >> 4)), // 右移4位，只取前4bit的值
                 (byte) ((b & 0x0f)) // 只取后面4bit的值，前面两位补0
         };
@@ -118,7 +121,7 @@ public final class CodecUtils {
      * @return byte数组{&lt;4,&lt;64}
      */
     public static byte[] parseHigh2Low6Bytes(byte b) {
-        return new byte[] {
+        return new byte[]{
                 (byte) ((b >> 6)), // 右移6位，只取前2bit的值
                 (byte) ((b & 0x3f)) // 只取后面6bit的值，前面两位补0
         };
@@ -137,19 +140,21 @@ public final class CodecUtils {
 
     /**
      * 把byte转为字符串的bit
+     *
      * @param b byte
      * @return bit字符串
      */
     public static String byteToBits(byte b) {
         return ""
-            + (byte) ((b >> 7) & 0x01) + (byte) ((b >> 6) & 0x1)
-            + (byte) ((b >> 5) & 0x01) + (byte) ((b >> 4) & 0x1)
-            + (byte) ((b >> 3) & 0x01) + (byte) ((b >> 2) & 0x1)
-            + (byte) ((b >> 1) & 0x01) + (byte) ((b >> 0) & 0x1);
+                + (byte) ((b >> 7) & 0x01) + (byte) ((b >> 6) & 0x1)
+                + (byte) ((b >> 5) & 0x01) + (byte) ((b >> 4) & 0x1)
+                + (byte) ((b >> 3) & 0x01) + (byte) ((b >> 2) & 0x1)
+                + (byte) ((b >> 1) & 0x01) + (byte) ((b >> 0) & 0x1);
     }
 
     /**
      * 把字符串的bit转为byte
+     *
      * @param bits bits
      * @return byte
      */
@@ -167,7 +172,7 @@ public final class CodecUtils {
     /**
      * byte数组比较，是否命中前面几位
      *
-     * @param bs 字符数组
+     * @param bs   字符数组
      * @param head 匹配头部数组
      * @return 是否匹配
      */
@@ -219,6 +224,44 @@ public final class CodecUtils {
     }
 
     /**
+     * byte[] to hex string, such as [0,1] --> "0001"
+     *
+     * @param bytes data
+     * @return hex string
+     */
+    public static String byte2hex(byte[] bytes) {
+        StringBuilder hs = new StringBuilder();
+        String stmp;
+        for (int n = 0; bytes != null && n < bytes.length; n++) {
+            stmp = Integer.toHexString(bytes[n] & 0XFF);
+            if (stmp.length() == 1) {
+                hs.append('0');
+            }
+            hs.append(stmp);
+        }
+        return hs.toString().toUpperCase();
+    }
+
+    /**
+     * hex string to byte[], such as "0001" -> [0,1]
+     *
+     * @param str hex string
+     * @return byte[]
+     */
+    public static byte[] hex2byte(String str) {
+        byte[] bytes = str.getBytes();
+        if ((bytes.length % 2) != 0) {
+            throw new IllegalArgumentException();
+        }
+        byte[] b2 = new byte[bytes.length / 2];
+        for (int n = 0; n < bytes.length; n += 2) {
+            String item = new String(bytes, n, 2);
+            b2[n / 2] = (byte) Integer.parseInt(item, 16);
+        }
+        return b2;
+    }
+
+    /**
      * 一个byte可以存8个boolean，可以按位获取
      *
      * @param modifiers 描述符
@@ -248,5 +291,49 @@ public final class CodecUtils {
             return (byte) (modifiers + (1 << i));
         }
         return modifiers;
+    }
+
+    /**
+     * 扁平化复制
+     *
+     * @param prefix    前缀
+     * @param sourceMap 原始map
+     * @param dstMap    目标map
+     */
+    public static void flatCopyTo(String prefix, Map<String, Object> sourceMap,
+                                  Map<String, String> dstMap) {
+        for (Map.Entry<String, Object> entry : sourceMap.entrySet()) {
+            String key = prefix + entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof String) {
+                dstMap.put(key, (String) value);
+            } else if (value instanceof Number) {
+                dstMap.put(key, value.toString());
+            } else if (value instanceof Map) {
+                flatCopyTo(key + ".", (Map<String, Object>) value, dstMap);
+            }
+        }
+    }
+
+    /**
+     * 树状恢复
+     *
+     * @param prefix    前缀
+     * @param sourceMap 原始map
+     * @param dstMap    目标map
+     * @param remove    命中遍历后是否删除
+     */
+    public static void treeCopyTo(String prefix, Map<String, String> sourceMap,
+                                  Map<String, String> dstMap, boolean remove) {
+        Iterator<Map.Entry<String, String>> it = sourceMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> entry = it.next();
+            if (entry.getKey().startsWith(prefix)) {
+                dstMap.put(entry.getKey().substring(prefix.length()), entry.getValue());
+                if (remove) {
+                    it.remove();
+                }
+            }
+        }
     }
 }

@@ -19,13 +19,11 @@ package com.alipay.sofa.rpc.server.rest;
 import java.io.Serializable;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ExampleObj implements Serializable {
 
-    private int    id;
+    private int id;
     private String name;
 
     public int getId() {

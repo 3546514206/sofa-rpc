@@ -34,7 +34,7 @@ public class StopWatch implements Cloneable {
     /**
      * 上次区间处理时间
      */
-    private int  lastElapsed;
+    private int lastElapsed;
 
     /**
      * 记录当前时间

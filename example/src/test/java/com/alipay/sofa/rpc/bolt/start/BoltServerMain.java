@@ -28,8 +28,6 @@ import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class BoltServerMain {
@@ -43,22 +41,22 @@ public class BoltServerMain {
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
 
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(22000)
-            .setDaemon(false);
+                .setPort(22000)
+                .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setApplication(application)
-            .setRef(new HelloServiceImpl())
-            .setServer(serverConfig)
-            .setRegister(false);
+                .setInterfaceId(HelloService.class.getName())
+                .setApplication(application)
+                .setRef(new HelloServiceImpl())
+                .setServer(serverConfig)
+                .setRegister(false);
 
         ProviderConfig<EchoService> providerConfig2 = new ProviderConfig<EchoService>()
-            .setInterfaceId(EchoService.class.getName())
-            .setApplication(application)
-            .setRef(new EchoServiceImpl())
-            .setServer(serverConfig)
-            .setRegister(false);
+                .setInterfaceId(EchoService.class.getName())
+                .setApplication(application)
+                .setRef(new EchoServiceImpl())
+                .setServer(serverConfig)
+                .setRegister(false);
 
         providerConfig.export();
         providerConfig2.export();

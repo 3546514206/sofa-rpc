@@ -31,20 +31,6 @@ import java.lang.reflect.InvocationHandler;
 @Extension("jdk")
 public class JDKProxy implements Proxy {
 
-    @Override
-    public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker) {
-        InvocationHandler handler = new JDKInvocationHandler(interfaceClass, proxyInvoker);
-        ClassLoader classLoader = ClassLoaderUtils.getCurrentClassLoader();
-        T result = (T) java.lang.reflect.Proxy.newProxyInstance(classLoader,
-            new Class[] { interfaceClass }, handler);
-        return result;
-    }
-
-    @Override
-    public Invoker getInvoker(Object proxyObject) {
-        return parseInvoker(proxyObject);
-    }
-
     /**
      * Parse proxy invoker from proxy object
      *
@@ -57,5 +43,19 @@ public class JDKProxy implements Proxy {
             return ((JDKInvocationHandler) handler).getProxyInvoker();
         }
         return null;
+    }
+
+    @Override
+    public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker) {
+        InvocationHandler handler = new JDKInvocationHandler(interfaceClass, proxyInvoker);
+        ClassLoader classLoader = ClassLoaderUtils.getCurrentClassLoader();
+        T result = (T) java.lang.reflect.Proxy.newProxyInstance(classLoader,
+                new Class[]{interfaceClass}, handler);
+        return result;
+    }
+
+    @Override
+    public Invoker getInvoker(Object proxyObject) {
+        return parseInvoker(proxyObject);
     }
 }

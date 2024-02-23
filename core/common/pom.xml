@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-core</artifactId>
-        <version>5.3.4</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>sofa-rpc-common</artifactId>
-    
+
     <dependencies>
+        <dependency>
+            <groupId>com.alipay.sofa.common</groupId>
+            <artifactId>sofa-common-tools</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-exception</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -25,7 +28,13 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -89,5 +98,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

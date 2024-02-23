@@ -21,8 +21,6 @@ import com.alipay.sofa.rpc.ext.Extension;
 import static com.alipay.sofa.rpc.module.TestModules.error;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Extension("test")

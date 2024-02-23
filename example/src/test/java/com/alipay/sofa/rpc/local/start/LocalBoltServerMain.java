@@ -31,8 +31,6 @@ import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import java.io.File;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class LocalBoltServerMain {
@@ -45,31 +43,31 @@ public class LocalBoltServerMain {
     public static void main(String[] args) {
 
         String file = System.getProperty("user.home") + File.separator
-            + "localFileTest" + File.separator + "localRegistry.reg";
+                + "localFileTest" + File.separator + "localRegistry.reg";
 
         RegistryConfig registryConfig = new RegistryConfig().setProtocol("local")
-            .setFile(file);
+                .setFile(file);
 
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(22222)
-            .setDaemon(false);
+                .setPort(22222)
+                .setDaemon(false);
 
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22200)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-            .setDaemon(false);
+                .setPort(22200)
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+                .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl())
-            .setServer(serverConfig)
-            .setRegistry(registryConfig);
+                .setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl())
+                .setServer(serverConfig)
+                .setRegistry(registryConfig);
 
         ProviderConfig<EchoService> providerConfig2 = new ProviderConfig<EchoService>()
-            .setInterfaceId(EchoService.class.getName())
-            .setRef(new EchoServiceImpl())
-            .setServer(serverConfig)
-            .setRegistry(registryConfig);
+                .setInterfaceId(EchoService.class.getName())
+                .setRef(new EchoServiceImpl())
+                .setServer(serverConfig)
+                .setRegistry(registryConfig);
 
         providerConfig.export();
         providerConfig2.export();

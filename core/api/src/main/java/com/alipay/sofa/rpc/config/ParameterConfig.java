@@ -33,17 +33,28 @@ public class ParameterConfig implements Serializable {
     /**
      * 关键字
      */
-    private String            key;
+    private String key;
 
     /**
      * 值
      */
-    private String            value;
+    private String value;
 
     /**
      * 是否隐藏（是的话，业务代码不能获取到）
      */
-    private boolean           hide             = false;
+    private boolean hide = false;
+
+    /**
+     * 自定义的key是否合法
+     *
+     * @param paramkey 参数key
+     * @return 是否合法
+     */
+    public static boolean isValidParamKey(String paramkey) {
+        char c = paramkey.charAt(0);
+        return c != RpcConstants.HIDE_KEY_PREFIX && c != RpcConstants.INTERNAL_KEY_PREFIX;
+    }
 
     /**
      * Gets key.
@@ -62,7 +73,7 @@ public class ParameterConfig implements Serializable {
     public void setKey(String key) {
         if (!isValidParamKey(key)) {
             throw ExceptionUtils.buildRuntime("param.key", key, "key can not start with "
-                + RpcConstants.HIDE_KEY_PREFIX + " and " + RpcConstants.INTERNAL_KEY_PREFIX);
+                    + RpcConstants.HIDE_KEY_PREFIX + " and " + RpcConstants.INTERNAL_KEY_PREFIX);
         }
         this.key = key;
     }
@@ -101,16 +112,5 @@ public class ParameterConfig implements Serializable {
      */
     public void setHide(boolean hide) {
         this.hide = hide;
-    }
-
-    /**
-     * 自定义的key是否合法
-     *
-     * @param paramkey 参数key
-     * @return 是否合法
-     */
-    public static boolean isValidParamKey(String paramkey) {
-        char c = paramkey.charAt(0);
-        return c != RpcConstants.HIDE_KEY_PREFIX && c != RpcConstants.INTERNAL_KEY_PREFIX;
     }
 }

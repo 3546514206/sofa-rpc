@@ -34,7 +34,7 @@ public class ProviderGroup {
     /**
      * 服务分组名称
      */
-    protected final String       name;
+    protected final String name;
 
     /**
      * 服务分组下服务端列表（缓存的是List，方便快速读取）
@@ -51,7 +51,7 @@ public class ProviderGroup {
     /**
      * Instantiates a new Provider group.
      *
-     * @param name          the name
+     * @param name the name
      */
     public ProviderGroup(String name) {
         this(name, null);
@@ -189,9 +189,9 @@ public class ProviderGroup {
     @Override
     public String toString() {
         return "ProviderGroup{" +
-            "name='" + name + '\'' +
-            ", providerInfos=" + providerInfos +
-            '}';
+                "name='" + name + '\'' +
+                ", providerInfos=" + providerInfos +
+                '}';
     }
 
 }

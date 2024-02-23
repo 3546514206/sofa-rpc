@@ -18,20 +18,20 @@ package com.alipay.sofa.rpc.asynchain;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.bolt.BoltSendableResponseCallback;
 
 import java.util.Random;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ServiceBImpl implements ServiceB {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(ServiceBImpl.class);
+    ServiceC serviceC;
     private Random random = new Random();
-
-    ServiceC       serviceC;
 
     public ServiceBImpl(ServiceC serviceC) {
         this.serviceC = serviceC;
@@ -43,7 +43,7 @@ public class ServiceBImpl implements ServiceB {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
                 // 此时C-异步返回->B
-                System.out.println("b get resp from c :" + appResponse);
+                LOGGER.info("b get resp from c :" + appResponse);
 
                 int respToA = random.nextInt(1000);
                 // 调这个方法B-异步返回->A

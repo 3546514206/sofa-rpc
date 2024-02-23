@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.test.exception;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 
 /**
- *
- *
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public interface TestExceptionService {

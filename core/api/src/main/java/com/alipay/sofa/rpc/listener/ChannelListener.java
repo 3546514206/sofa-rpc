@@ -21,7 +21,7 @@ import com.alipay.sofa.rpc.transport.AbstractChannel;
 
 /**
  * Listener of channel event
- * 
+ *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 @Unstable
@@ -32,12 +32,12 @@ public interface ChannelListener {
      *
      * @param channel Channel
      */
-    public void onConnected(AbstractChannel channel);
+    void onConnected(AbstractChannel channel);
 
     /**
      * Handle disconnect event on channel closed
      *
      * @param channel Channel
      */
-    public void onDisconnected(AbstractChannel channel);
+    void onDisconnected(AbstractChannel channel);
 }

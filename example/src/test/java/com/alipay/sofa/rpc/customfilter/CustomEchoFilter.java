@@ -26,8 +26,6 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Extension("customEcho")
@@ -47,7 +45,7 @@ public class CustomEchoFilter extends Filter {
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
         LOGGER.info("echo request : {}, {}", request.getInterfaceName() + "." + request.getMethodName(),
-            request.getMethodArgs());
+                request.getMethodArgs());
 
         SofaResponse response = invoker.invoke(request);
 

@@ -29,11 +29,11 @@ public abstract class ProtocolInfo {
     /**
      * 底层通讯协议：TCP
      */
-    public static final byte NET_PROTOCOL_TCP  = 0;
+    public static final byte NET_PROTOCOL_TCP = 0;
     /**
      * 底层通讯协议：UDP
      */
-    public static final byte NET_PROTOCOL_UDP  = 1;
+    public static final byte NET_PROTOCOL_UDP = 1;
     /**
      * 底层通讯协议：HTTP
      */
@@ -42,22 +42,22 @@ public abstract class ProtocolInfo {
     /**
      * 协议名称
      */
-    protected final String   name;
+    protected final String name;
 
     /**
      * 协议ID
      */
-    protected final byte     code;
+    protected final byte code;
 
     /**
      * 协议底层通讯协议 是tcp还是udp还是http等
      */
-    protected final byte     netProtocol;
+    protected final byte netProtocol;
 
     /**
      * 是否定长协议
      */
-    protected final boolean  lengthFixed;
+    protected final boolean lengthFixed;
 
     /**
      * Instantiates a new Protocol info.

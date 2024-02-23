@@ -16,14 +16,17 @@
  */
 package com.alipay.sofa.rpc.test;
 
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+
 /**
- *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class HelloServiceImpl implements HelloService {
 
-    private int    sleep;
+    private final static Logger LOGGER = LoggerFactory.getLogger(HelloServiceImpl.class);
+
+    private int sleep;
 
     private String result;
 
@@ -41,7 +44,7 @@ public class HelloServiceImpl implements HelloService {
 
     @Override
     public String sayHello(String name, int age) {
-        System.out.println("name:" + name + ", age:" + age);
+        LOGGER.info("name:" + name + ", age:" + age);
         if (sleep > 0) {
             try {
                 Thread.sleep(sleep);

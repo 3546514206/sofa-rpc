@@ -34,7 +34,6 @@ import java.util.Collections;
  * <p>方法级别的Callback</p>
  * <p>
  *
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class CallbackMethodClientMain {
@@ -50,31 +49,31 @@ public class CallbackMethodClientMain {
 
         MethodConfig methodConfig = new MethodConfig();
         methodConfig.setName("sayHello")
-            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
-            .setOnReturn(new SofaResponseCallback() {
-                @Override
-                public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                    LOGGER.info("Method get result: {}", appResponse);
-                }
+                .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
+                .setOnReturn(new SofaResponseCallback() {
+                    @Override
+                    public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                        LOGGER.info("Method get result: {}", appResponse);
+                    }
 
-                @Override
-                public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                    LOGGER.info("Method get app exception: {}", throwable);
-                }
+                    @Override
+                    public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                        LOGGER.info("Method get app exception: {}", throwable);
+                    }
 
-                @Override
-                public void onSofaException(SofaRpcException sofaException, String methodName,
-                                            RequestBase request) {
-                    LOGGER.info("Method get sofa exception: {}", sofaException);
-                }
-            });
+                    @Override
+                    public void onSofaException(SofaRpcException sofaException, String methodName,
+                                                RequestBase request) {
+                        LOGGER.info("Method get sofa exception: {}", sofaException);
+                    }
+                });
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setApplication(applicationConfig)
-            .setInterfaceId(HelloService.class.getName())
-            .setTimeout(5000)
-            .setMethods(Collections.singletonList(methodConfig))
-            .setDirectUrl("bolt://127.0.0.1:22222?appName=future-server");
+                .setApplication(applicationConfig)
+                .setInterfaceId(HelloService.class.getName())
+                .setTimeout(5000)
+                .setMethods(Collections.singletonList(methodConfig))
+                .setDirectUrl("bolt://127.0.0.1:22222?appName=future-server");
         HelloService helloService = consumerConfig.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);

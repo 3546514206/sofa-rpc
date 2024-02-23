@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class RestClientMain {
@@ -41,13 +40,13 @@ public class RestClientMain {
     public static void main(String[] args) throws InterruptedException {
         ApplicationConfig application = new ApplicationConfig().setAppName("test-client");
         ConsumerConfig<RestService> consumerConfig = new ConsumerConfig<RestService>()
-            .setApplication(application)
-            .setInterfaceId(RestService.class.getName())
-            .setProtocol("rest")
-            .setBootstrap("rest")
-            .setDirectUrl("rest://127.0.0.1:8888")
-            //.setRegister(false)
-            .setTimeout(3000);
+                .setApplication(application)
+                .setInterfaceId(RestService.class.getName())
+                .setProtocol("rest")
+                .setBootstrap("rest")
+                .setDirectUrl("rest://127.0.0.1:8888")
+                //.setRegister(false)
+                .setTimeout(3000);
         RestService helloService = consumerConfig.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);

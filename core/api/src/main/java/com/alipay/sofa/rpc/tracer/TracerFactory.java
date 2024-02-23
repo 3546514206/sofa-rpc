@@ -16,10 +16,10 @@
  */
 package com.alipay.sofa.rpc.tracer;
 
-import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * Factory of Tracer
@@ -36,15 +36,15 @@ public final class TracerFactory {
     public synchronized static Tracer getTracer(String tracerName) {
         try {
             ExtensionClass<Tracer> ext = ExtensionLoaderFactory.getExtensionLoader(Tracer.class)
-                .getExtensionClass(tracerName);
+                    .getExtensionClass(tracerName);
             if (ext == null) {
-                throw ExceptionUtils.buildRuntime("tracer.name", tracerName);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_FAIL_LOAD_TRACER_EXT, tracerName));
             }
             return ext.getExtInstance();
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_FAIL_LOAD_TRACER_EXT, tracerName), e);
         }
     }
 }
